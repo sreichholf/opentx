@@ -19,20 +19,26 @@ local function drawChannels(x, y, w, h, firstchan, lastchan)
     if lastchan > 9 then offset = 88 end
     lcd.drawText(x + offset, y + (i -firstchan) * 20, string.format("%.d", chanVal), RIGHT)
     lcd.drawRectangle(x + offset + 2, y + (i -firstchan) * 20, w - 90, 18)
+    lcd.drawLine(x + offset + (w - 90) / 2 + 2,  y + (i -firstchan) * 20, x + offset + (w - 90) / 2 + 2,  18 + y + (i -firstchan) * 20, SOLID, 0)
     if chanVal > 0 then
       lcd.drawFilledRectangle(x + offset + 2 + (w - 90) / 2,  y + (i -firstchan) * 20, (w - 90) * chanVal / 200 , 18)
     elseif chanVal < 0 then
-      lcd.drawFilledRectangle(x + offset + (w - 90) / 2 + (chanVal * w / 400),  y + (i - firstchan) * 20, math.abs(chanVal) * ((w - 90) / 2) / 100 , 18)
+      local endpoint = x + offset + (w - 90) / 2 + 2
+      local startpoint = x + offset + 2
+      local size = math.floor(math.abs((endpoint - startpoint) * chanVal / 100))
+      lcd.drawFilledRectangle(endpoint - size,  y + (i - firstchan) * 20, size, 18)
     end
   end
 end
 
 --- Size is 180x70
 local function zoneMedium(zone)
+  drawChannels(zone.zone.x, zone.zone.y, zone.zone.w, zone.zone.h, 1, 4)
 end
 
 --- Size is 190x150
 local function zoneLarge(zone)
+  drawChannels(zone.zone.x, zone.zone.y, zone.zone.w, zone.zone.h, 1, 8)
 end
 
 --- Size is 390x170
