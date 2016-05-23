@@ -1,5 +1,5 @@
 local options = {
-  { "Option1", VALUE, 32 }
+  { "Option1", VALUE, 1 }
 }
 
 local function create(zone, options)
@@ -11,41 +11,49 @@ local function update(myZone, options)
   myZone.options = options
 end
 
+local function valueMax( value, max)
+  if value > max then
+    return max
+  else
+    return value
+  end
+end
+
 local function drawChannels(x, y, w, h, firstchan, lastchan)
   for i=firstchan, lastchan, 1 do
     local chanVal = getValue('ch'..i) / 10.24
-    lcd.drawText(x, y + (i - firstchan) * 20, "CH"..i)
+    lcd.drawText(x, y + (i - firstchan) * 20, "CH"..i, TEXT_COLOR)
     local offset = 78
     if lastchan > 9 then offset = 88 end
-    lcd.drawText(x + offset, y + (i -firstchan) * 20, string.format("%.d", chanVal), RIGHT)
+    lcd.drawText(x + offset, y + (i -firstchan) * 20, string.format("%.d", chanVal), RIGHT + TEXT_COLOR)
     lcd.drawRectangle(x + offset + 2, y + (i -firstchan) * 20, w - 90, 18)
-    lcd.drawLine(x + offset + (w - 90) / 2 + 2,  y + (i -firstchan) * 20, x + offset + (w - 90) / 2 + 2,  18 + y + (i -firstchan) * 20, SOLID, 0)
+    lcd.drawLine(x + offset + (w - 90) / 2 + 2,  y + (i -firstchan) * 20, x + offset + (w - 90) / 2 + 2,  18 + y + (i -firstchan) * 20, SOLID + MAINVIEW_GRAPHICS_COLOR, 0)
     if chanVal > 0 then
-      lcd.drawFilledRectangle(x + offset + 2 + (w - 90) / 2,  y + (i -firstchan) * 20, (w - 90) * chanVal / 200 , 18)
+      lcd.drawFilledRectangle(x + offset + 2 + (w - 90) / 2,  y + (i -firstchan) * 20, (w - 90) * chanVal / 200 , 18, MAINVIEW_GRAPHICS_COLOR)
     elseif chanVal < 0 then
       local endpoint = x + offset + (w - 90) / 2 + 2
       local startpoint = x + offset + 2
       local size = math.floor(math.abs((endpoint - startpoint) * chanVal / 100))
-      lcd.drawFilledRectangle(endpoint - size,  y + (i - firstchan) * 20, size, 18)
+      lcd.drawFilledRectangle(endpoint - size,  y + (i - firstchan) * 20, size, 18, MAINVIEW_GRAPHICS_COLOR)
     end
   end
 end
 
 --- Size is 180x70
 local function zoneMedium(zone)
-  drawChannels(zone.zone.x, zone.zone.y, zone.zone.w, zone.zone.h, 1, 4)
+  drawChannels(zone.zone.x, zone.zone.y, zone.zone.w, zone.zone.h, zone.options.Option1, valueMax(zone.options.Option1 + 3, 32))
 end
 
 --- Size is 190x150
 local function zoneLarge(zone)
-  drawChannels(zone.zone.x, zone.zone.y, zone.zone.w, zone.zone.h, 1, 8)
+  drawChannels(zone.zone.x, zone.zone.y, zone.zone.w, zone.zone.h,zone.options.Option1, valueMax(zone.options.Option1 + 7, 32))
 end
 
 --- Size is 390x170
 local function zoneXLarge(zone)
   lcd.drawLine(zone.zone.x + math.floor(zone.zone.w / 2), zone.zone.y, zone.zone.x + math.floor(zone.zone.w / 2), zone.zone.y + zone.zone.h, SOLID, 0)
-  drawChannels(zone.zone.x, zone.zone.y, math.floor(zone.zone.w / 2), zone.zone.h, 1, 8)
-  drawChannels(zone.zone.x + math.floor(zone.zone.w / 2) + 5, zone.zone.y, math.floor(zone.zone.w / 2), zone.zone.h, 9, 16)
+  drawChannels(zone.zone.x, zone.zone.y, math.floor(zone.zone.w / 2), zone.zone.h, zone.options.Option1, valueMax(zone.options.Option1 + 7, 32))
+  drawChannels(zone.zone.x + math.floor(zone.zone.w / 2) + 5, zone.zone.y, math.floor(zone.zone.w / 2), zone.zone.h, valueMax(zone.options.Option1 + 8, 32) , valueMax(zone.options.Option1 + 15, 32))
 end
 
 function refresh(myZone)
