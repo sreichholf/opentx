@@ -20,9 +20,9 @@
 
 #include "../../opentx.h"
 
-void setupPulses(unsigned int port);
-void setupPulsesPPM(unsigned int port);
-void setupPulsesPXX(unsigned int port);
+void setupPulses(uint8_t port);
+void setupPulsesPPM(uint8_t port);
+void setupPulsesPXX(uint8_t port);
 
 static void intmodulePxxStart(void);
 static void intmodulePxxStop(void);
@@ -508,8 +508,6 @@ static void extmoduleDsm2Start()
                                                          | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC | DMA_SxCR_DIR_0 | DMA_SxCR_PFCTRL;
   DMA2_Stream2->PAR = CONVERT_PTR_UINT(&EXTMODULE_TIMER->DMAR);
   DMA2_Stream2->M0AR = CONVERT_PTR_UINT(&modulePulsesData[EXTERNAL_MODULE].dsm2.pulses[1]);
-//      DMA2_Stream2->FCR = 0x05; //DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0;
-//      DMA2_Stream2->NDTR = 100;
   DMA2_Stream2->CR |= DMA_SxCR_EN;               // Enable DMA
 
   EXTMODULE_TIMER->CCMR1 = TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0;                     // Toggle CC1 o/p
@@ -591,9 +589,7 @@ extern "C" void TIM8_CC_IRQHandler()
     EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;  // Enable this interrupt
   }
 #if defined(DSM2)
-  else if ((s_current_protocol[EXTERNAL_MODULE] >= PROTO_DSM2_LP45 && s_current_protocol[EXTERNAL_MODULE] <= PROTO_DSM2_DSMX) || IS_MULTIMODULE_PROTOCOL (s_current_protocol[EXTERNAL_MODULE]))
-
-{
+  else if ((s_current_protocol[EXTERNAL_MODULE] >= PROTO_DSM2_LP45 && s_current_protocol[EXTERNAL_MODULE] <= PROTO_DSM2_DSMX) || IS_MULTIMODULE_PROTOCOL (s_current_protocol[EXTERNAL_MODULE])) {
     DMA2_Stream2->CR &= ~DMA_SxCR_EN;              // Disable DMA
     DMA2->LIFCR = DMA_LIFCR_CTCIF2 | DMA_LIFCR_CHTIF2 | DMA_LIFCR_CTEIF2 | DMA_LIFCR_CDMEIF2 | DMA_LIFCR_CFEIF2; // Write ones to clear bits
     DMA2_Stream2->M0AR = CONVERT_PTR_UINT(&modulePulsesData[EXTERNAL_MODULE].dsm2.pulses[1]);

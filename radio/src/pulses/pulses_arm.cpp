@@ -28,7 +28,7 @@ uint8_t moduleFlag[NUM_MODULES] = { 0 };
 ModulePulsesData modulePulsesData[NUM_MODULES] __DMA;
 TrainerPulsesData trainerPulsesData __DMA;
 
-void setupPulses(unsigned int port)
+void setupPulses(uint8_t port)
 {
   uint8_t required_protocol;
 
