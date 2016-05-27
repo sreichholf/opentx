@@ -46,6 +46,6 @@ git_id(GIT_STR)
 
 add_subdirectory(${RADIO_SRC_DIRECTORY})
 
-if(Qt5Widgets_FOUND)
+if(Qt5Widgets_FOUND AND Qt5Xml_FOUND AND Qt5_LinguistTools_FOUND AND QT5PrintSupport_Found AND Qt5Multimedia_FOUND)
   add_subdirectory(${COMPANION_SRC_DIRECTORY})
 endif()
