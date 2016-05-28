@@ -291,6 +291,10 @@
 #define EXTMODULE_PPM_GPIO_PinSource    GPIO_PinSource15
 #define EXTMODULE_TIMER                 TIM2
 #define EXTMODULE_PPM_GPIO_AF           GPIO_AF_TIM2
+#define EXTMODULE_DMA_STREAM            DMA1_Stream1
+#define EXTMODULE_DMA_IRQn              DMA1_Stream1_IRQn
+#define EXTMODULE_DMA_IRQHANDLER        DMA1_Stream1_IRQHandler
+
 #define EXTMODULE_TIMER_IRQn            TIM2_IRQn
 #define EXTMODULE_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)
 

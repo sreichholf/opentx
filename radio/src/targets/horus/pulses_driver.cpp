@@ -24,37 +24,37 @@ void setupPulses(uint8_t port);
 void setupPulsesPPM(uint8_t port);
 void setupPulsesPXX(uint8_t port);
 
-static void intmodulePxxStart(void) ;
-static void intmodulePxxStop(void) ;
-static void extmodulePxxStart(void) ;
-static void extmodulePxxStop(void) ;
+static void intmodulePxxStart(void);
+static void intmodulePxxStop(void);
+static void extmodulePxxStart(void);
+static void extmodulePxxStop(void);
 #if defined(DSM2)
-static void extmoduleDsm2Start(void) ;
-static void extmoduleDsm2Stop(void) ;
+static void extmoduleDsm2Start(void);
+static void extmoduleDsm2Stop(void);
 #endif
-static void extmodulePpmStart(void) ;
-static void extmodulePpmStop(void) ;
-static void intmoduleNoneStart(void) ;
-static void intmoduleNoneStop(void) ;
-static void extmoduleNoneStart(void) ;
-static void extmoduleNoneStop(void) ;
-static void extmoduleCrossfireStart(void) ;
-static void extmoduleCrossfireStop(void) ;
+static void extmodulePpmStart(void);
+static void extmodulePpmStop(void);
+static void intmoduleNoneStart(void);
+static void intmoduleNoneStop(void);
+static void extmoduleNoneStart(void);
+static void extmoduleNoneStop(void);
+static void extmoduleCrossfireStart(void);
+static void extmoduleCrossfireStop(void);
 
 void init_pxx(uint32_t port)
 {
   if (port == INTERNAL_MODULE)
-    intmodulePxxStart() ;
+    intmodulePxxStart();
   else
-    extmodulePxxStart() ;
+    extmodulePxxStart();
 }
 
 void disable_pxx(uint32_t port)
 {
   if (port == INTERNAL_MODULE)
-    intmodulePxxStop() ;
+    intmodulePxxStop();
   else
-    extmodulePxxStop() ;
+    extmodulePxxStop();
 }
 
 #if defined(DSM2)
@@ -130,36 +130,36 @@ static void intmoduleNoneStart()
   // Timer1, channel 3
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = INTMODULE_TX_GPIO_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT ;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(INTMODULE_TX_GPIO, &GPIO_InitStructure);
-  GPIO_SetBits(INTMODULE_TX_GPIO, INTMODULE_TX_GPIO_PIN) ; // Set high
+  GPIO_SetBits(INTMODULE_TX_GPIO, INTMODULE_TX_GPIO_PIN); // Set high
 
-  INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
-  INTMODULE_TIMER->ARR = 36000 ;             // 18mS
-  INTMODULE_TIMER->CCR2 = 32000 ;            // Update time
-  INTMODULE_TIMER->PSC = INTMODULE_TIMER_FREQ / 2000000 - 1 ; // 0.5uS (2Mhz)
+  INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
+  INTMODULE_TIMER->ARR = 36000;             // 18mS
+  INTMODULE_TIMER->CCR2 = 32000;            // Update time
+  INTMODULE_TIMER->PSC = INTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
 
-  INTMODULE_TIMER->CCER = TIM_CCER_CC3E ;
+  INTMODULE_TIMER->CCER = TIM_CCER_CC3E;
 
-  INTMODULE_TIMER->CCMR2 = 0 ;
-  INTMODULE_TIMER->EGR = 1 ;                                                         // Restart
+  INTMODULE_TIMER->CCMR2 = 0;
+  INTMODULE_TIMER->EGR = 1;                                                         // Restart
 
-  INTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_0 ;                     // Toggle CC1 o/p
-  INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF ;                             // Clear flag
-  INTMODULE_TIMER->DIER |= TIM_DIER_CC2IE ;  // Enable this interrupt
-  INTMODULE_TIMER->CR1 |= TIM_CR1_CEN ;
-  NVIC_EnableIRQ(INTMODULE_TIMER_IRQn) ;
+  INTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_0;                     // Toggle CC1 o/p
+  INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;                             // Clear flag
+  INTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;  // Enable this interrupt
+  INTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
+  NVIC_EnableIRQ(INTMODULE_TIMER_IRQn);
   NVIC_SetPriority(INTMODULE_TIMER_IRQn, 7);
 }
 
 static void intmoduleNoneStop()
 {
-  NVIC_DisableIRQ(INTMODULE_TIMER_IRQn) ;
-  INTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE ;
-  INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
+  NVIC_DisableIRQ(INTMODULE_TIMER_IRQn);
+  INTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE;
+  INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
 }
 
 #if !defined(SIMU)
@@ -220,12 +220,12 @@ static void extmoduleNoneStart()
   GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, 0); // TODO : check if needed
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = EXTMODULE_PPM_GPIO_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT ;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(EXTMODULE_PPM_GPIO, &GPIO_InitStructure);
-  GPIO_SetBits(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PIN) ; // Set high
+  GPIO_SetBits(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PIN); // Set high
 
   TIM_DeInit(EXTMODULE_TIMER);
 
@@ -248,13 +248,13 @@ static void extmoduleNoneStart()
   TIM_Cmd(EXTMODULE_TIMER, ENABLE);
 
   // enable interrupt and set it's priority
-  NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn) ;
+  NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
 }
 
 static void extmoduleNoneStop()
 {
-  NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn) ;
+  NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn);
   TIM_DeInit(EXTMODULE_TIMER);
 }
 
@@ -264,34 +264,34 @@ static void extmoduleCrossfireStart()
 
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = EXTMODULE_PPM_GPIO_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT ;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(EXTMODULE_PPM_GPIO, &GPIO_InitStructure);
   GPIO_SetBits(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PIN); // Set high
 
-  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
-  EXTMODULE_TIMER->ARR = 5000 ;             // 2.5mS
-  EXTMODULE_TIMER->CCR2 = 32000 ;            // Update time
-  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1 ; // 0.5uS (2Mhz)
+  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
+  EXTMODULE_TIMER->ARR = 5000;             // 2.5mS
+  EXTMODULE_TIMER->CCR2 = 32000;            // Update time
+  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
 
-  EXTMODULE_TIMER->CCMR2 = 0 ;
-  EXTMODULE_TIMER->EGR = 1 ;                                                         // Restart
+  EXTMODULE_TIMER->CCMR2 = 0;
+  EXTMODULE_TIMER->EGR = 1;                                                         // Restart
 
-  EXTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_0 ;                     // Toggle CC1 o/p
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF ;                             // Clear flag
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE ;  // Enable this interrupt
-  EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN ;
-  NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn) ;
+  EXTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_0;                     // Toggle CC1 o/p
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;                             // Clear flag
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;  // Enable this interrupt
+  EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
+  NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
 }
 
 static void extmoduleCrossfireStop()
 {
-  NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn) ;
-  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE ;
-  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
+  NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn);
+  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE;
+  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
 
   if (!IS_TRAINER_EXTERNAL_MODULE()) {
     EXTERNAL_MODULE_OFF();
@@ -305,7 +305,7 @@ void intmodulePxxStart()
 
   INTERNAL_MODULE_ON();
 
-  setupPulsesPXX(INTERNAL_MODULE) ; // TODO not here!
+  setupPulsesPXX(INTERNAL_MODULE); // TODO not here!
 
   NVIC_InitStructure.NVIC_IRQChannel = INTMODULE_DMA_STREAM_IRQ;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
@@ -340,24 +340,25 @@ void intmodulePxxStart()
   USART_Cmd(INTMODULE_USART, ENABLE);
 
   // open DMA
+  // TODO
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);	// Enable DMA1 clock
 
   // Timer
-  INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
-  INTMODULE_TIMER->ARR = 18000 ;                     // 9mS
-  INTMODULE_TIMER->CCR2 = 15000 ;            // Update time
-  INTMODULE_TIMER->PSC = INTMODULE_TIMER_FREQ / 2000000 - 1 ; // 0.5uS (2Mhz)
-  INTMODULE_TIMER->CCER = TIM_CCER_CC3E ;
-  INTMODULE_TIMER->CCER = TIM_CCER_CC3E ;
+  INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
+  INTMODULE_TIMER->ARR = 18000;                     // 9mS
+  INTMODULE_TIMER->CCR2 = 15000;            // Update time
+  INTMODULE_TIMER->PSC = INTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
+  INTMODULE_TIMER->CCER = TIM_CCER_CC3E;
+  INTMODULE_TIMER->CCER = TIM_CCER_CC3E;
 
-  INTMODULE_TIMER->CCMR2 = 0 ;
-  INTMODULE_TIMER->EGR = 1 ;                                                         // Restart
+  INTMODULE_TIMER->CCMR2 = 0;
+  INTMODULE_TIMER->EGR = 1;                                                         // Restart
 
-  INTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_0 ;                     // Toggle CC1 o/p
-  INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF ;                             // Clear flag
-  INTMODULE_TIMER->DIER |= TIM_DIER_CC2IE ;  // Enable this interrupt
-  INTMODULE_TIMER->CR1 |= TIM_CR1_CEN ;
-  NVIC_EnableIRQ(INTMODULE_TIMER_IRQn) ;
+  INTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_0;                     // Toggle CC1 o/p
+  INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;                             // Clear flag
+  INTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;  // Enable this interrupt
+  INTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
+  NVIC_EnableIRQ(INTMODULE_TIMER_IRQn);
   NVIC_SetPriority(INTMODULE_TIMER_IRQn, 7);
 }
 
@@ -385,7 +386,7 @@ void extmodulePxxStart()
   RCC_GetClocksFreq(&RCC_Clocks);
 
   DMA_InitTypeDef DMA_InitStructure;
-  DMA_DeInit(DMA1_Stream1);
+  DMA_DeInit(EXTMODULE_DMA_STREAM);
   DMA_InitStructure.DMA_Channel = DMA_Channel_3;
   DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&TIM2->ARR);
   DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)modulePulsesData[EXTERNAL_MODULE].pxx.pulses;
@@ -401,11 +402,11 @@ void extmodulePxxStart()
   DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
   DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
   DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-  DMA_Init(DMA1_Stream1, &DMA_InitStructure);
+  DMA_Init(EXTMODULE_DMA_STREAM, &DMA_InitStructure);
 
   // config TIM2 as pulse driver
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-  TIM_TimeBaseStructure.TIM_Prescaler = (RCC_Clocks.PCLK1_Frequency*2) / 2000000 - 1 ;
+  TIM_TimeBaseStructure.TIM_Prescaler = (RCC_Clocks.PCLK1_Frequency*2) / 2000000 - 1;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseStructure.TIM_Period = 20 - 1;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
@@ -425,8 +426,8 @@ void extmodulePxxStart()
   TIM_OC1Init(TIM2, &TIM_OCInitStructure);
 
   /* DMA enable */
-  DMA_Cmd(DMA1_Stream1, ENABLE);
-  DMA_ITConfig(DMA1_Stream1, DMA_IT_TC, ENABLE);
+  DMA_Cmd(EXTMODULE_DMA_STREAM, ENABLE);
+  DMA_ITConfig(EXTMODULE_DMA_STREAM, DMA_IT_TC, ENABLE);
   TIM_DMAConfig(TIM2, TIM_DMABase_ARR, TIM_DMABurstLength_1Transfer);
   TIM_DMACmd(TIM2, TIM_DMA_Update, ENABLE);
 
@@ -434,25 +435,25 @@ void extmodulePxxStart()
   TIM_CtrlPWMOutputs(TIM2, ENABLE);
 
   NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream1_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannel = EXTMODULE_DMA_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 7;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; /* Not used as 4 bits are used for the pre-emption priority. */;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init( &NVIC_InitStructure );
+  NVIC_Init(&NVIC_InitStructure);
 
   TIM2->ARR = 18000;
   TIM_Cmd(TIM2, ENABLE);
 
-  NVIC_EnableIRQ(DMA1_Stream1_IRQn) ;
-  NVIC_SetPriority(DMA1_Stream1_IRQn, 7);
+  NVIC_EnableIRQ(EXTMODULE_DMA_IRQn);
+  NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
 }
 
-extern "C" void DMA1_Stream1_IRQHandler()
+extern "C" void EXTMODULE_DMA_IRQHANDLER()
 {
-  if (!DMA_GetITStatus(DMA1_Stream1, DMA_IT_TCIF1))
+  if (!DMA_GetITStatus(EXTMODULE_DMA_STREAM, DMA_IT_TCIF1))
     return;
 
-  DMA_ClearITPendingBit(DMA1_Stream1, DMA_IT_TCIF1);
+  DMA_ClearITPendingBit(EXTMODULE_DMA_STREAM, DMA_IT_TCIF1);
 
   setupPulses(EXTERNAL_MODULE);
 
@@ -460,10 +461,10 @@ extern "C" void DMA1_Stream1_IRQHandler()
     return;
 
   // fire DMA
-  DMA_DeInit(DMA1_Stream1);
+  DMA_DeInit(EXTMODULE_DMA_STREAM);
   DMA_InitTypeDef DMA_InitStructure;
   DMA_InitStructure.DMA_Channel = DMA_Channel_3;
-  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&TIM2->ARR) ;
+  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&TIM2->ARR);
   DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)modulePulsesData[EXTERNAL_MODULE].pxx.pulses;
   DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
   DMA_InitStructure.DMA_BufferSize = modulePulsesData[EXTERNAL_MODULE].pxx.ptr - modulePulsesData[EXTERNAL_MODULE].pxx.pulses;
@@ -477,16 +478,16 @@ extern "C" void DMA1_Stream1_IRQHandler()
   DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
   DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
   DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-  DMA_Init(DMA1_Stream1, &DMA_InitStructure);
-  DMA_Cmd(DMA1_Stream1, ENABLE);
-  DMA_ITConfig(DMA1_Stream1, DMA_IT_TC, ENABLE);
+  DMA_Init(EXTMODULE_DMA_STREAM, &DMA_InitStructure);
+  DMA_Cmd(EXTMODULE_DMA_STREAM, ENABLE);
+  DMA_ITConfig(EXTMODULE_DMA_STREAM, DMA_IT_TC, ENABLE);
 }
 
 static void extmodulePxxStop()
 {
-  DMA_DeInit(DMA1_Stream1);
+  DMA_DeInit(EXTMODULE_DMA_STREAM);
   TIM_DeInit(TIM2);
-  NVIC_DisableIRQ(DMA1_Stream1_IRQn);
+  NVIC_DisableIRQ(EXTMODULE_DMA_IRQn);
 }
 
 #if defined(DSM2)
@@ -505,43 +506,43 @@ static void extmoduleDsm2Start()
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(EXTMODULE_PPM_GPIO, &GPIO_InitStructure);
 
-  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
-  EXTMODULE_TIMER->ARR = 44000 ;                     // 22mS
-  EXTMODULE_TIMER->CCR2 = 40000 ;            // Update time
-  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1 ; // 0.5uS (2Mhz)
-  EXTMODULE_TIMER->CCER = TIM_CCER_CC1NE  | TIM_CCER_CC1NP ;
-  EXTMODULE_TIMER->CR2 = TIM_CR2_OIS1 ;                      // O/P idle high
-  EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE ;             // Enable outputs
+  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
+  EXTMODULE_TIMER->ARR = 44000;                     // 22mS
+  EXTMODULE_TIMER->CCR2 = 40000;            // Update time
+  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
+  EXTMODULE_TIMER->CCER = TIM_CCER_CC1NE  | TIM_CCER_CC1NP;
+  EXTMODULE_TIMER->CR2 = TIM_CR2_OIS1;                      // O/P idle high
+  EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE;             // Enable outputs
   EXTMODULE_TIMER->CCR1 = modulePulsesData[EXTERNAL_MODULE].dsm2.pulses[0];
-  EXTMODULE_TIMER->CCMR1 = TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_0 ;                     // Force O/P high
-  EXTMODULE_TIMER->EGR = 1 ;                                                         // Restart
+  EXTMODULE_TIMER->CCMR1 = TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_0;                     // Force O/P high
+  EXTMODULE_TIMER->EGR = 1;                                                         // Restart
 
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC1DE ;          // Enable DMA on CC1 match
-  EXTMODULE_TIMER->DCR = 13 ;                                                                // DMA to CC1
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC1DE;          // Enable DMA on CC1 match
+  EXTMODULE_TIMER->DCR = 13;                                                                // DMA to CC1
 
   // Enable the DMA channel here, DMA1 stream 5, channel 3 (TIM2_CH1)
-  DMA1_Stream5->CR &= ~DMA_SxCR_EN ;              // Disable DMA
-  DMA1->HIFCR = DMA_HIFCR_CTCIF5 | DMA_HIFCR_CHTIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CFEIF5 ; // Write ones to clear bits
+  DMA1_Stream5->CR &= ~DMA_SxCR_EN;              // Disable DMA
+  DMA1->HIFCR = DMA_HIFCR_CTCIF5 | DMA_HIFCR_CHTIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CFEIF5; // Write ones to clear bits
   DMA1_Stream5->CR = DMA_SxCR_CHSEL_0 | DMA_SxCR_CHSEL_1 | DMA_SxCR_PL_0 | DMA_SxCR_MSIZE_0
-                                                         | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC | DMA_SxCR_DIR_0 | DMA_SxCR_PFCTRL ;
+                                                         | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC | DMA_SxCR_DIR_0 | DMA_SxCR_PFCTRL;
   DMA1_Stream5->PAR = CONVERT_PTR_UINT(&EXTMODULE_TIMER->DMAR);
   DMA1_Stream5->M0AR = CONVERT_PTR_UINT(&modulePulsesData[EXTERNAL_MODULE].dsm2.pulses[1]);
-  DMA1_Stream5->CR |= DMA_SxCR_EN ;               // Enable DMA
+  DMA1_Stream5->CR |= DMA_SxCR_EN;               // Enable DMA
 
-  EXTMODULE_TIMER->CCMR1 = TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0 ;                     // Toggle CC1 o/p
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF ;                             // Clear flag
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE ;  // Enable this interrupt
-  EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN ;
-  NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn) ;
+  EXTMODULE_TIMER->CCMR1 = TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0;                     // Toggle CC1 o/p
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;                             // Clear flag
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;  // Enable this interrupt
+  EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
+  NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
 }
 
 static void extmoduleDsm2Stop()
 {
-  DMA1_Stream5->CR &= ~DMA_SxCR_EN ;              // Disable DMA
-  NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn) ;
-  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE ;
-  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
+  DMA1_Stream5->CR &= ~DMA_SxCR_EN;              // Disable DMA
+  NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn);
+  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE;
+  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
   if (!IS_TRAINER_EXTERNAL_MODULE()) {
     EXTERNAL_MODULE_OFF();
   }
@@ -573,42 +574,42 @@ static void extmodulePpmStart()
   // CC2 interrupt is then used to setup new PPM values for the
   // next PPM pulses train.
   // stop timer
-  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
+  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
 
   // setupPulsesPPM() is also configuring registers,
   // so it has to be called after the peripheral is enabled
-  setupPulsesPPM(EXTERNAL_MODULE) ;
+  setupPulsesPPM(EXTERNAL_MODULE);
 
-  EXTMODULE_TIMER->ARR = *modulePulsesData[EXTERNAL_MODULE].ppm.ptr++ ;
-  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1 ; // 0.5uS (2Mhz)
+  EXTMODULE_TIMER->ARR = *modulePulsesData[EXTERNAL_MODULE].ppm.ptr++;
+  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
 
   // CH1 PWM mode 1, CH1 out is OFF if CNT<CCR1(delay) and ON if bigger (up to AAR,which is pulse length)
   EXTMODULE_TIMER->CCMR1 = TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC2PE;        // PWM mode 1
 
   // Reloads register vales now
-  EXTMODULE_TIMER->EGR = 1 ;
+  EXTMODULE_TIMER->EGR = 1;
 
   // Update DMA request enabled. WHY?????
-  EXTMODULE_TIMER->DIER = TIM_DIER_UDE ;
+  EXTMODULE_TIMER->DIER = TIM_DIER_UDE;
 
   // clear interrupt flags and enable Update and
   // CC2 interrupts (this one is enabled now to trigger pulse setup)
-  EXTMODULE_TIMER->SR &= ~TIM_SR_UIF ;                               // Clear flag
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF ;                             // Clear flag
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE ;
-  EXTMODULE_TIMER->DIER |= TIM_DIER_UIE ;
+  EXTMODULE_TIMER->SR &= ~TIM_SR_UIF;                               // Clear flag
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;                             // Clear flag
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;
+  EXTMODULE_TIMER->DIER |= TIM_DIER_UIE;
 
   // enable timer and global interrupts
-  EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN ;
-  NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn) ;
+  EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
+  NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
 }
 
 static void extmodulePpmStop()
 {
-  NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn) ;
-  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE & ~TIM_DIER_UIE ;
-  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN ;
+  NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn);
+  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE & ~TIM_DIER_UIE;
+  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
   EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF & ~TIM_SR_UIF;            // Clear all flags
   if (!IS_TRAINER_EXTERNAL_MODULE()) {
     EXTERNAL_MODULE_OFF();
@@ -617,15 +618,14 @@ static void extmodulePpmStop()
 
 extern "C" void TIM2_IRQHandler()
 {
-  return;
-
   DEBUG_INTERRUPT(INT_TIM2);
+
   //determine if its CC or UP interrupt
   uint16_t sr = EXTMODULE_TIMER->SR;
   uint16_t dier = EXTMODULE_TIMER->DIER;
 
   if (sr & TIM_SR_CC2IF && dier & TIM_DIER_CC2IE) {    // Capture/Compare 2 interrupt enabled and fired
-    EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF ;             // Clear flag
+    EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;             // Clear flag
 
     setupPulses(EXTERNAL_MODULE);
 
@@ -634,10 +634,10 @@ extern "C" void TIM2_IRQHandler()
     }
 #if defined(DSM2)
     else if (s_current_protocol[EXTERNAL_MODULE] >= PROTO_DSM2_LP45 && s_current_protocol[EXTERNAL_MODULE] <= PROTO_DSM2_DSMX) {
-      DMA1_Stream5->CR &= ~DMA_SxCR_EN ;              // Disable DMA
-      DMA1->HIFCR = DMA_HIFCR_CTCIF5 | DMA_HIFCR_CHTIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CFEIF5 ; // Write ones to clear bits
+      DMA1_Stream5->CR &= ~DMA_SxCR_EN;              // Disable DMA
+      DMA1->HIFCR = DMA_HIFCR_CTCIF5 | DMA_HIFCR_CHTIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CFEIF5; // Write ones to clear bits
       DMA1_Stream5->M0AR = CONVERT_PTR_UINT(&modulePulsesData[EXTERNAL_MODULE].dsm2.pulses[1]);
-      DMA1_Stream5->CR |= DMA_SxCR_EN ;               // Enable DMA
+      DMA1_Stream5->CR |= DMA_SxCR_EN;               // Enable DMA
       EXTMODULE_TIMER->CCR1 = modulePulsesData[EXTERNAL_MODULE].dsm2.pulses[0];
     }
 #endif
@@ -645,23 +645,23 @@ extern "C" void TIM2_IRQHandler()
       // Stop CC2 interrupt, the pulse train period ended
       // the new PPM values were set, we begin new pulse train
       // generation with Update interrupt
-      EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE ; // stop CC2 interrupt
-      EXTMODULE_TIMER->DIER |= TIM_DIER_UDE ;
-      EXTMODULE_TIMER->SR &= ~TIM_SR_UIF ;     // Clear Update interrupt flag
-      EXTMODULE_TIMER->DIER |= TIM_DIER_UIE ;  // Enable Update interrupt
+      EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // stop CC2 interrupt
+      EXTMODULE_TIMER->DIER |= TIM_DIER_UDE;
+      EXTMODULE_TIMER->SR &= ~TIM_SR_UIF;     // Clear Update interrupt flag
+      EXTMODULE_TIMER->DIER |= TIM_DIER_UIE;  // Enable Update interrupt
     }
   }
 
   if (sr & TIM_SR_UIF && dier & TIM_DIER_UIE) {      // Update interrupt enabled and fired
-    EXTMODULE_TIMER->SR &= ~TIM_SR_UIF ;                               // Clear flag
+    EXTMODULE_TIMER->SR &= ~TIM_SR_UIF;                               // Clear flag
     if (s_current_protocol[EXTERNAL_MODULE] == PROTO_PPM) {
-      EXTMODULE_TIMER->ARR = *modulePulsesData[EXTERNAL_MODULE].ppm.ptr++ ;
+      EXTMODULE_TIMER->ARR = *modulePulsesData[EXTERNAL_MODULE].ppm.ptr++;
       if (*modulePulsesData[EXTERNAL_MODULE].ppm.ptr == 0) {
         // we reached the end of PPM pulses
         // enable CC2 interrupt (which comes before Update in any case)
         // to start new PPM cycle and setup pulses
-        EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF ;    // Clear CC1 flag
-        EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE ;  // Enable CC1 interrupt
+        EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;    // Clear CC1 flag
+        EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;  // Enable CC1 interrupt
       }
     }
   }
