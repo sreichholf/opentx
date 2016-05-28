@@ -134,7 +134,7 @@ void pxxPutPcmTail(uint8_t port)
 #else
 void pxxPutPcmPart(uint8_t port, uint8_t value)
 {
-  uint32_t duration = value ? 48 : 32;
+  uint32_t duration = value ? 47 : 31;
   *modulePulsesData[port].pxx.ptr++ = duration;
   modulePulsesData[port].pxx.rest -= duration;
 }
@@ -178,14 +178,6 @@ void pxxInitPcmArray(uint8_t port)
   modulePulsesData[port].pxx.pcmOnesCount = 0;
 }
 
-void pxxPutPcmPreamble(uint8_t port)
-{
-  pxxPutPcmPart(port, 0);
-  pxxPutPcmPart(port, 0);
-  pxxPutPcmPart(port, 0);
-  pxxPutPcmPart(port, 0);
-}
-
 void pxxPutPcmHead(uint8_t port)
 {
   // send 7E, do not CRC
@@ -214,13 +206,6 @@ inline void initPcmArray(uint8_t port)
     uartInitPcmArray(port);
   else
     pxxInitPcmArray(port);
-}
-
-inline void putPcmPreamble(uint8_t port)
-{
-  if (!IS_UART_MODULE(port)) {
-    pxxPutPcmPreamble(port);
-  }
 }
 
 inline void putPcmHead(uint8_t port)
@@ -258,11 +243,6 @@ inline void initPcmArray(uint8_t port)
   pxxInitPcmArray(port);
 }
 
-inline void putPcmPreamble(uint8_t port)
-{
-  pxxPutPcmPreamble(port);
-}
-
 inline void putPcmHead(uint8_t port)
 {
   pxxPutPcmHead(port);
@@ -289,9 +269,6 @@ void setupPulsesPXX(uint8_t port)
   uint16_t pulseValue=0, pulseValueLow=0;
 
   initPcmArray(port);
-
-  /* Preamble */
-  putPcmPreamble(port);
 
   /* Sync */
   putPcmHead(port);

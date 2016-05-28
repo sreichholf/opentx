@@ -418,7 +418,7 @@ void extmodulePxxStart()
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
   TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
-  TIM_OCInitStructure.TIM_Pulse = 16;
+  TIM_OCInitStructure.TIM_Pulse = 18;
   TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
   TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_Low;
   TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
@@ -629,8 +629,14 @@ extern "C" void TIM2_IRQHandler()
 
     setupPulses(EXTERNAL_MODULE);
 
-    if (s_current_protocol[EXTERNAL_MODULE] == PROTO_PXX) {
-
+    if (s_current_protocol[EXTERNAL_MODULE] == PROTO_PPM) {
+      // Stop CC2 interrupt, the pulse train period ended
+      // the new PPM values were set, we begin new pulse train
+      // generation with Update interrupt
+      EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // stop CC2 interrupt
+      EXTMODULE_TIMER->DIER |= TIM_DIER_UDE;
+      EXTMODULE_TIMER->SR &= ~TIM_SR_UIF;     // Clear Update interrupt flag
+      EXTMODULE_TIMER->DIER |= TIM_DIER_UIE;  // Enable Update interrupt
     }
 #if defined(DSM2)
     else if (s_current_protocol[EXTERNAL_MODULE] >= PROTO_DSM2_LP45 && s_current_protocol[EXTERNAL_MODULE] <= PROTO_DSM2_DSMX) {
@@ -641,15 +647,6 @@ extern "C" void TIM2_IRQHandler()
       EXTMODULE_TIMER->CCR1 = modulePulsesData[EXTERNAL_MODULE].dsm2.pulses[0];
     }
 #endif
-    else if (s_current_protocol[EXTERNAL_MODULE] == PROTO_PPM) {
-      // Stop CC2 interrupt, the pulse train period ended
-      // the new PPM values were set, we begin new pulse train
-      // generation with Update interrupt
-      EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // stop CC2 interrupt
-      EXTMODULE_TIMER->DIER |= TIM_DIER_UDE;
-      EXTMODULE_TIMER->SR &= ~TIM_SR_UIF;     // Clear Update interrupt flag
-      EXTMODULE_TIMER->DIER |= TIM_DIER_UIE;  // Enable Update interrupt
-    }
   }
 
   if (sr & TIM_SR_UIF && dier & TIM_DIER_UIE) {      // Update interrupt enabled and fired
