@@ -65,15 +65,16 @@ PACK(struct PxxUartPulsesData {
 
 #if defined(PPM_PIN_TIMER)
 PACK(struct PxxTimerPulsesData {
-  uint16_t pulses[400];
-  uint16_t *ptr;
-  uint16_t pcmValue;
+  uint32_t pulses[400];
+  uint32_t * ptr;
+  uint16_t rest;
+  // uint16_t pcmValue;
   uint16_t pcmCrc;
   uint32_t pcmOnesCount;
 });
 PACK(struct Dsm2TimerPulsesData {
   uint16_t pulses[400];
-  uint16_t *ptr;
+  uint16_t * ptr;
   uint16_t value;
   uint16_t index;
 });

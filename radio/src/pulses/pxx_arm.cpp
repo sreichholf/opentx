@@ -134,18 +134,14 @@ void pxxPutPcmTail(uint8_t port)
 #else
 void pxxPutPcmPart(uint8_t port, uint8_t value)
 {
-  modulePulsesData[port].pxx.pcmValue += 18 ;                                        // Output 1 for this time
-  *modulePulsesData[port].pxx.ptr++ = modulePulsesData[port].pxx.pcmValue ;
-  modulePulsesData[port].pxx.pcmValue += 14 ;
-  if (value) {
-    modulePulsesData[port].pxx.pcmValue += 16 ;
-  }
-  *modulePulsesData[port].pxx.ptr++ = modulePulsesData[port].pxx.pcmValue ;  // Output 0 for this time
+  uint32_t duration = value ? 48 : 32;
+  *modulePulsesData[port].pxx.ptr++ = duration;
+  modulePulsesData[port].pxx.rest -= duration;
 }
 
 void pxxPutPcmTail(uint8_t port)
 {
-  *modulePulsesData[port].pxx.ptr++ = 18010 ;             // Past the 18000 of the ARR
+  *modulePulsesData[port].pxx.ptr++ = modulePulsesData[port].pxx.rest;
 }
 #endif
 
@@ -176,7 +172,8 @@ void pxxPutPcmByte(uint8_t port, uint8_t byte)
 void pxxInitPcmArray(uint8_t port)
 {
   modulePulsesData[port].pxx.ptr = modulePulsesData[port].pxx.pulses;
-  modulePulsesData[port].pxx.pcmValue = 0;
+  // modulePulsesData[port].pxx.pcmValue = 0;
+  modulePulsesData[port].pxx.rest = 18000;
   modulePulsesData[port].pxx.pcmCrc = 0;
   modulePulsesData[port].pxx.pcmOnesCount = 0;
 }
