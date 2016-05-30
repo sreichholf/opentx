@@ -163,13 +163,11 @@ void audioEnd()
 
 void setScaledVolume(uint8_t volume)
 {
-#if !defined(NO_HARDWARE_VOLUME)
+#if !defined(SOFTWARE_VOLUME)
   volumeRequired = volumeScale[min<uint8_t>(volume, VOLUME_LEVEL_MAX)];
-#ifndef AR9X
   __disable_irq() ;
   i2cCheck() ;
   __enable_irq() ;
-#endif
 #endif
 }
 
