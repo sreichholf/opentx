@@ -867,346 +867,346 @@ void ConvertRadioData_217_to_218(RadioData & settings)
 
 void ConvertModel_216_to_217(ModelData & model)
 {
-  // Timer3 added
-  // 32bits Timers
-  // MixData reduction
-  // PPM center range
-  // Telemetry custom screens
-
-  assert(sizeof(ModelData_v216) <= sizeof(ModelData));
-
-  ModelData_v216 oldModel;
-  memcpy(&oldModel, &model, sizeof(oldModel));
-  ModelData_v217 & newModel = (ModelData_v217 &)model;
-  memset(&newModel, 0, sizeof(ModelData_v217));
-
-  char name[LEN_MODEL_NAME+1];
-  zchar2str(name, oldModel.header.name, LEN_MODEL_NAME);
-  TRACE("Model %s conversion from v216 to v217", name);
-
-  newModel.header.modelId[0] = oldModel.header.modelId;
-  memcpy(newModel.header.name, oldModel.header.name, LEN_MODEL_NAME);
-#if defined(PCBTARANIS)
-  memcpy(newModel.header.bitmap, oldModel.header.bitmap, LEN_BITMAP_NAME);
-#endif
-
-  for (uint8_t i=0; i<2; i++) {
-    TimerData_v217 & timer = newModel.timers[i];
-    if (oldModel.timers[i].mode >= TMRMODE_COUNT)
-      timer.mode = TMRMODE_COUNT + ConvertSwitch_216_to_217(oldModel.timers[i].mode - TMRMODE_COUNT + 1) - 1;
-    else
-      timer.mode = ConvertSwitch_216_to_217(oldModel.timers[i].mode);
-    timer.start = oldModel.timers[i].start;
-    timer.countdownBeep = oldModel.timers[i].countdownBeep;
-    timer.minuteBeep = oldModel.timers[i].minuteBeep;
-    timer.persistent = oldModel.timers[i].persistent;
-    timer.value = oldModel.timers[i].value;
-  }
-  newModel.telemetryProtocol = oldModel.telemetryProtocol;
-  newModel.thrTrim = oldModel.thrTrim;
-  newModel.trimInc = oldModel.trimInc;
-  newModel.disableThrottleWarning = oldModel.disableThrottleWarning;
-  newModel.displayChecklist = oldModel.displayChecklist;
-  newModel.extendedLimits = oldModel.extendedLimits;
-  newModel.extendedTrims = oldModel.extendedTrims;
-  newModel.throttleReversed = oldModel.throttleReversed;
-  newModel.beepANACenter = oldModel.beepANACenter;
-  for (int i=0; i<MAX_MIXERS; i++) {
-    newModel.mixData[i].destCh = oldModel.mixData[i].destCh;
-    newModel.mixData[i].flightModes = oldModel.mixData[i].flightModes;
-    newModel.mixData[i].mltpx = oldModel.mixData[i].mltpx;
-    newModel.mixData[i].carryTrim = oldModel.mixData[i].carryTrim;
-    newModel.mixData[i].mixWarn = oldModel.mixData[i].mixWarn;
-    newModel.mixData[i].weight = ConvertGVar_216_to_217(oldModel.mixData[i].weight);
-    newModel.mixData[i].swtch = ConvertSwitch_216_to_217(oldModel.mixData[i].swtch);
-#if defined(PCBTARANIS)
-    newModel.mixData[i].curve = oldModel.mixData[i].curve;
-#else
-    newModel.mixData[i].curveMode = oldModel.mixData[i].curveMode;
-    newModel.mixData[i].noExpo = oldModel.mixData[i].noExpo;
-    newModel.mixData[i].curveParam = oldModel.mixData[i].curveParam;
-#endif
-    newModel.mixData[i].delayUp = oldModel.mixData[i].delayUp;
-    newModel.mixData[i].delayDown = oldModel.mixData[i].delayDown;
-    newModel.mixData[i].speedUp = oldModel.mixData[i].speedUp;
-    newModel.mixData[i].speedDown = oldModel.mixData[i].speedDown;
-    newModel.mixData[i].srcRaw = ConvertSource_216_to_217(oldModel.mixData[i].srcRaw);
-    newModel.mixData[i].offset = ConvertGVar_216_to_217(oldModel.mixData[i].offset);
-    memcpy(newModel.mixData[i].name, oldModel.mixData[i].name, sizeof(newModel.mixData[i].name));
-  }
-  for (int i=0; i<NUM_CHNOUT; i++) {
-#if defined(PCBTARANIS)
-    newModel.limitData[i].min = ConvertGVar_216_to_217(oldModel.limitData[i].min);
-    newModel.limitData[i].max = ConvertGVar_216_to_217(oldModel.limitData[i].max);
-    newModel.limitData[i].offset = ConvertGVar_216_to_217(oldModel.limitData[i].offset);
-    newModel.limitData[i].ppmCenter = oldModel.limitData[i].ppmCenter;
-    newModel.limitData[i].symetrical = oldModel.limitData[i].symetrical;
-    newModel.limitData[i].revert = oldModel.limitData[i].revert;
-    newModel.limitData[i].curve = oldModel.limitData[i].curve;
-    memcpy(newModel.limitData[i].name, oldModel.limitData[i].name, sizeof(newModel.limitData[i].name));
-#else
-    newModel.limitData[i] = oldModel.limitData[i];
-#endif
-  }
-  for (int i=0; i<MAX_EXPOS; i++) {
-#if defined(PCBTARANIS)
-    newModel.expoData[i].srcRaw = ConvertSource_216_to_217(oldModel.expoData[i].srcRaw);
-    newModel.expoData[i].scale = oldModel.expoData[i].scale;
-    newModel.expoData[i].carryTrim = oldModel.expoData[i].carryTrim;
-    newModel.expoData[i].curve = oldModel.expoData[i].curve;
-    newModel.expoData[i].offset = oldModel.expoData[i].offset;
-#else
-    newModel.expoData[i].curveMode = oldModel.expoData[i].curveMode;
-    newModel.expoData[i].curveParam = oldModel.expoData[i].curveParam;
-#endif
-    newModel.expoData[i].chn = oldModel.expoData[i].chn;
-    newModel.expoData[i].swtch = ConvertSwitch_216_to_217(oldModel.expoData[i].swtch);
-    newModel.expoData[i].flightModes = oldModel.expoData[i].flightModes;
-    newModel.expoData[i].weight = oldModel.expoData[i].weight;
-    newModel.expoData[i].mode = oldModel.expoData[i].mode;
-    memcpy(newModel.expoData[i].name, oldModel.expoData[i].name, sizeof(newModel.expoData[i].name));
-  }
-  memcpy(newModel.curves, oldModel.curves, sizeof(newModel.curves));
-  memcpy(newModel.points, oldModel.points, sizeof(newModel.points));
-  for (int i=0; i<32; i++) {
-    LogicalSwitchData_v217 & sw = newModel.logicalSw[i];
-    sw.func = oldModel.logicalSw[i].func;
-    sw.v1 = oldModel.logicalSw[i].v1;
-    sw.v2 = oldModel.logicalSw[i].v2;
-    sw.v3 = oldModel.logicalSw[i].v3;
-    sw.delay = oldModel.logicalSw[i].delay;
-    sw.duration = oldModel.logicalSw[i].duration;
-    uint8_t cstate = lswFamily(sw.func);
-    if (cstate == LS_FAMILY_OFS || cstate == LS_FAMILY_COMP || cstate == LS_FAMILY_DIFF) {
-      sw.v1 = ConvertSource_216_to_217((uint8_t)sw.v1);
-      if (cstate == LS_FAMILY_COMP) {
-        sw.v2 = ConvertSource_216_to_217((uint8_t)sw.v2);
-      }
-    }
-    else if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY) {
-      sw.v1 = ConvertSwitch_216_to_217(sw.v1);
-      sw.v2 = ConvertSwitch_216_to_217(sw.v2);
-    }
-    else if (cstate == LS_FAMILY_EDGE) {
-      sw.v1 = ConvertSwitch_216_to_217(sw.v1);
-    }
-    sw.andsw = ConvertSwitch_216_to_217(sw.andsw);
-  }
-  for (int i=0; i<NUM_CFN; i++) {
-    CustomFunctionData_v216 & fn = newModel.customFn[i];
-    fn = oldModel.customFn[i];
-    fn.swtch = ConvertSwitch_216_to_217(fn.swtch);
-    if (fn.func == FUNC_PLAY_VALUE || fn.func == FUNC_VOLUME || (IS_ADJUST_GV_FUNC(fn.func) && fn.all.mode == FUNC_ADJUST_GVAR_SOURCE)) {
-      fn.all.val = ConvertSource_216_to_217(fn.all.val);
-    }
-  }
-
-  newModel.swashR.collectiveSource = ConvertSource_216_to_217(newModel.swashR.collectiveSource);
-  // TODO other fields
-
-  for (int i=0; i<MAX_FLIGHT_MODES; i++) {
-    newModel.flightModeData[i] = oldModel.flightModeData[i];
-    newModel.flightModeData[i].swtch = ConvertSwitch_216_to_217(oldModel.flightModeData[i].swtch);
-  }
-
-  newModel.thrTraceSrc = oldModel.thrTraceSrc;
-  newModel.switchWarningState = oldModel.switchWarningState;
-  newModel.switchWarningEnable = oldModel.switchWarningEnable;
-  memcpy(newModel.gvars, oldModel.gvars, sizeof(newModel.gvars));
-
-  memcpy(&newModel.frsky.rssiAlarms, &oldModel.frsky.rssiAlarms, sizeof(newModel.frsky.rssiAlarms));
-
-  for (int i=0; i<NUM_MODULES+1; i++) {
-    newModel.moduleData[i].type = 0;
-    newModel.moduleData[i].rfProtocol = oldModel.moduleData[i].rfProtocol;
-    newModel.moduleData[i].channelsStart = oldModel.moduleData[i].channelsStart;
-    newModel.moduleData[i].channelsCount = oldModel.moduleData[i].channelsCount;
-    newModel.moduleData[i].failsafeMode = oldModel.moduleData[i].failsafeMode + 1;
-    for (int j=0; j<NUM_CHNOUT; j++) {
-      newModel.moduleData[i].failsafeChannels[j] = oldModel.moduleData[i].failsafeChannels[j];
-    }
-    newModel.moduleData[i].ppm.delay = oldModel.moduleData[i].ppmDelay;
-    newModel.moduleData[i].ppm.frameLength = oldModel.moduleData[i].ppmFrameLength;
-    newModel.moduleData[i].ppm.pulsePol = oldModel.moduleData[i].ppmPulsePol;
-  }
-
-#if defined(PCBTARANIS)
-  newModel.moduleData[INTERNAL_MODULE].type = MODULE_TYPE_XJT;
-#endif
-  newModel.moduleData[EXTERNAL_MODULE].type = oldModel.externalModule;
-
-#if defined(PCBTARANIS)
-  newModel.trainerMode = oldModel.trainerMode;
-  // TODO memcpy(newModel.scriptsData, oldModel.scriptsData, sizeof(newModel.scriptsData));
-  memcpy(newModel.curveNames, oldModel.curveNames, sizeof(newModel.curveNames));
-  memcpy(newModel.inputNames, oldModel.inputNames, sizeof(newModel.inputNames));
-#endif
-  newModel.potsWarnMode = oldModel.nPotsToWarn >> 6;
-  newModel.potsWarnEnabled = oldModel.nPotsToWarn & 0x1f;
-  memcpy(newModel.potsWarnPosition, oldModel.potPosition, sizeof(newModel.potsWarnPosition));
+//  // Timer3 added
+//  // 32bits Timers
+//  // MixData reduction
+//  // PPM center range
+//  // Telemetry custom screens
+//
+//  assert(sizeof(ModelData_v216) <= sizeof(ModelData));
+//
+//  ModelData_v216 oldModel;
+//  memcpy(&oldModel, &model, sizeof(oldModel));
+//  ModelData_v217 & newModel = (ModelData_v217 &)model;
+//  memset(&newModel, 0, sizeof(ModelData_v217));
+//
+//  char name[LEN_MODEL_NAME+1];
+//  zchar2str(name, oldModel.header.name, LEN_MODEL_NAME);
+//  TRACE("Model %s conversion from v216 to v217", name);
+//
+//  newModel.header.modelId[0] = oldModel.header.modelId;
+//  memcpy(newModel.header.name, oldModel.header.name, LEN_MODEL_NAME);
+//#if defined(PCBTARANIS)
+//  memcpy(newModel.header.bitmap, oldModel.header.bitmap, LEN_BITMAP_NAME);
+//#endif
+//
+//  for (uint8_t i=0; i<2; i++) {
+//    TimerData_v217 & timer = newModel.timers[i];
+//    if (oldModel.timers[i].mode >= TMRMODE_COUNT)
+//      timer.mode = TMRMODE_COUNT + ConvertSwitch_216_to_217(oldModel.timers[i].mode - TMRMODE_COUNT + 1) - 1;
+//    else
+//      timer.mode = ConvertSwitch_216_to_217(oldModel.timers[i].mode);
+//    timer.start = oldModel.timers[i].start;
+//    timer.countdownBeep = oldModel.timers[i].countdownBeep;
+//    timer.minuteBeep = oldModel.timers[i].minuteBeep;
+//    timer.persistent = oldModel.timers[i].persistent;
+//    timer.value = oldModel.timers[i].value;
+//  }
+//  newModel.telemetryProtocol = oldModel.telemetryProtocol;
+//  newModel.thrTrim = oldModel.thrTrim;
+//  newModel.trimInc = oldModel.trimInc;
+//  newModel.disableThrottleWarning = oldModel.disableThrottleWarning;
+//  newModel.displayChecklist = oldModel.displayChecklist;
+//  newModel.extendedLimits = oldModel.extendedLimits;
+//  newModel.extendedTrims = oldModel.extendedTrims;
+//  newModel.throttleReversed = oldModel.throttleReversed;
+//  newModel.beepANACenter = oldModel.beepANACenter;
+//  for (int i=0; i<MAX_MIXERS; i++) {
+//    newModel.mixData[i].destCh = oldModel.mixData[i].destCh;
+//    newModel.mixData[i].flightModes = oldModel.mixData[i].flightModes;
+//    newModel.mixData[i].mltpx = oldModel.mixData[i].mltpx;
+//    newModel.mixData[i].carryTrim = oldModel.mixData[i].carryTrim;
+//    newModel.mixData[i].mixWarn = oldModel.mixData[i].mixWarn;
+//    newModel.mixData[i].weight = ConvertGVar_216_to_217(oldModel.mixData[i].weight);
+//    newModel.mixData[i].swtch = ConvertSwitch_216_to_217(oldModel.mixData[i].swtch);
+//#if defined(PCBTARANIS)
+//    newModel.mixData[i].curve = oldModel.mixData[i].curve;
+//#else
+//    newModel.mixData[i].curveMode = oldModel.mixData[i].curveMode;
+//    newModel.mixData[i].noExpo = oldModel.mixData[i].noExpo;
+//    newModel.mixData[i].curveParam = oldModel.mixData[i].curveParam;
+//#endif
+//    newModel.mixData[i].delayUp = oldModel.mixData[i].delayUp;
+//    newModel.mixData[i].delayDown = oldModel.mixData[i].delayDown;
+//    newModel.mixData[i].speedUp = oldModel.mixData[i].speedUp;
+//    newModel.mixData[i].speedDown = oldModel.mixData[i].speedDown;
+//    newModel.mixData[i].srcRaw = ConvertSource_216_to_217(oldModel.mixData[i].srcRaw);
+//    newModel.mixData[i].offset = ConvertGVar_216_to_217(oldModel.mixData[i].offset);
+//    memcpy(newModel.mixData[i].name, oldModel.mixData[i].name, sizeof(newModel.mixData[i].name));
+//  }
+//  for (int i=0; i<NUM_CHNOUT; i++) {
+//#if defined(PCBTARANIS)
+//    newModel.limitData[i].min = ConvertGVar_216_to_217(oldModel.limitData[i].min);
+//    newModel.limitData[i].max = ConvertGVar_216_to_217(oldModel.limitData[i].max);
+//    newModel.limitData[i].offset = ConvertGVar_216_to_217(oldModel.limitData[i].offset);
+//    newModel.limitData[i].ppmCenter = oldModel.limitData[i].ppmCenter;
+//    newModel.limitData[i].symetrical = oldModel.limitData[i].symetrical;
+//    newModel.limitData[i].revert = oldModel.limitData[i].revert;
+//    newModel.limitData[i].curve = oldModel.limitData[i].curve;
+//    memcpy(newModel.limitData[i].name, oldModel.limitData[i].name, sizeof(newModel.limitData[i].name));
+//#else
+//    newModel.limitData[i] = oldModel.limitData[i];
+//#endif
+//  }
+//  for (int i=0; i<MAX_EXPOS; i++) {
+//#if defined(PCBTARANIS)
+//    newModel.expoData[i].srcRaw = ConvertSource_216_to_217(oldModel.expoData[i].srcRaw);
+//    newModel.expoData[i].scale = oldModel.expoData[i].scale;
+//    newModel.expoData[i].carryTrim = oldModel.expoData[i].carryTrim;
+//    newModel.expoData[i].curve = oldModel.expoData[i].curve;
+//    newModel.expoData[i].offset = oldModel.expoData[i].offset;
+//#else
+//    newModel.expoData[i].curveMode = oldModel.expoData[i].curveMode;
+//    newModel.expoData[i].curveParam = oldModel.expoData[i].curveParam;
+//#endif
+//    newModel.expoData[i].chn = oldModel.expoData[i].chn;
+//    newModel.expoData[i].swtch = ConvertSwitch_216_to_217(oldModel.expoData[i].swtch);
+//    newModel.expoData[i].flightModes = oldModel.expoData[i].flightModes;
+//    newModel.expoData[i].weight = oldModel.expoData[i].weight;
+//    newModel.expoData[i].mode = oldModel.expoData[i].mode;
+//    memcpy(newModel.expoData[i].name, oldModel.expoData[i].name, sizeof(newModel.expoData[i].name));
+//  }
+//  memcpy(newModel.curves, oldModel.curves, sizeof(newModel.curves));
+//  memcpy(newModel.points, oldModel.points, sizeof(newModel.points));
+//  for (int i=0; i<32; i++) {
+//    LogicalSwitchData_v217 & sw = newModel.logicalSw[i];
+//    sw.func = oldModel.logicalSw[i].func;
+//    sw.v1 = oldModel.logicalSw[i].v1;
+//    sw.v2 = oldModel.logicalSw[i].v2;
+//    sw.v3 = oldModel.logicalSw[i].v3;
+//    sw.delay = oldModel.logicalSw[i].delay;
+//    sw.duration = oldModel.logicalSw[i].duration;
+//    uint8_t cstate = lswFamily(sw.func);
+//    if (cstate == LS_FAMILY_OFS || cstate == LS_FAMILY_COMP || cstate == LS_FAMILY_DIFF) {
+//      sw.v1 = ConvertSource_216_to_217((uint8_t)sw.v1);
+//      if (cstate == LS_FAMILY_COMP) {
+//        sw.v2 = ConvertSource_216_to_217((uint8_t)sw.v2);
+//      }
+//    }
+//    else if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY) {
+//      sw.v1 = ConvertSwitch_216_to_217(sw.v1);
+//      sw.v2 = ConvertSwitch_216_to_217(sw.v2);
+//    }
+//    else if (cstate == LS_FAMILY_EDGE) {
+//      sw.v1 = ConvertSwitch_216_to_217(sw.v1);
+//    }
+//    sw.andsw = ConvertSwitch_216_to_217(sw.andsw);
+//  }
+//  for (int i=0; i<NUM_CFN; i++) {
+//    CustomFunctionData_v216 & fn = newModel.customFn[i];
+//    fn = oldModel.customFn[i];
+//    fn.swtch = ConvertSwitch_216_to_217(fn.swtch);
+//    if (fn.func == FUNC_PLAY_VALUE || fn.func == FUNC_VOLUME || (IS_ADJUST_GV_FUNC(fn.func) && fn.all.mode == FUNC_ADJUST_GVAR_SOURCE)) {
+//      fn.all.val = ConvertSource_216_to_217(fn.all.val);
+//    }
+//  }
+//
+//  newModel.swashR.collectiveSource = ConvertSource_216_to_217(newModel.swashR.collectiveSource);
+//  // TODO other fields
+//
+//  for (int i=0; i<MAX_FLIGHT_MODES; i++) {
+//    newModel.flightModeData[i] = oldModel.flightModeData[i];
+//    newModel.flightModeData[i].swtch = ConvertSwitch_216_to_217(oldModel.flightModeData[i].swtch);
+//  }
+//
+//  newModel.thrTraceSrc = oldModel.thrTraceSrc;
+//  newModel.switchWarningState = oldModel.switchWarningState;
+//  newModel.switchWarningEnable = oldModel.switchWarningEnable;
+//  memcpy(newModel.gvars, oldModel.gvars, sizeof(newModel.gvars));
+//
+//  memcpy(&newModel.frsky.rssiAlarms, &oldModel.frsky.rssiAlarms, sizeof(newModel.frsky.rssiAlarms));
+//
+//  for (int i=0; i<NUM_MODULES+1; i++) {
+//    newModel.moduleData[i].type = 0;
+//    newModel.moduleData[i].rfProtocol = oldModel.moduleData[i].rfProtocol;
+//    newModel.moduleData[i].channelsStart = oldModel.moduleData[i].channelsStart;
+//    newModel.moduleData[i].channelsCount = oldModel.moduleData[i].channelsCount;
+//    newModel.moduleData[i].failsafeMode = oldModel.moduleData[i].failsafeMode + 1;
+//    for (int j=0; j<NUM_CHNOUT; j++) {
+//      newModel.moduleData[i].failsafeChannels[j] = oldModel.moduleData[i].failsafeChannels[j];
+//    }
+//    newModel.moduleData[i].ppm.delay = oldModel.moduleData[i].ppmDelay;
+//    newModel.moduleData[i].ppm.frameLength = oldModel.moduleData[i].ppmFrameLength;
+//    newModel.moduleData[i].ppm.pulsePol = oldModel.moduleData[i].ppmPulsePol;
+//  }
+//
+//#if defined(PCBTARANIS)
+//  newModel.moduleData[INTERNAL_MODULE].type = MODULE_TYPE_XJT;
+//#endif
+//  newModel.moduleData[EXTERNAL_MODULE].type = oldModel.externalModule;
+//
+//#if defined(PCBTARANIS)
+//  newModel.trainerMode = oldModel.trainerMode;
+//  // TODO memcpy(newModel.scriptsData, oldModel.scriptsData, sizeof(newModel.scriptsData));
+//  memcpy(newModel.curveNames, oldModel.curveNames, sizeof(newModel.curveNames));
+//  memcpy(newModel.inputNames, oldModel.inputNames, sizeof(newModel.inputNames));
+//#endif
+//  newModel.potsWarnMode = oldModel.nPotsToWarn >> 6;
+//  newModel.potsWarnEnabled = oldModel.nPotsToWarn & 0x1f;
+//  memcpy(newModel.potsWarnPosition, oldModel.potPosition, sizeof(newModel.potsWarnPosition));
 }
 
 void ConvertModel_217_to_218(ModelData & model)
 {
-  assert(sizeof(ModelData_v217) <= sizeof(ModelData));
-
-  ModelData_v217 oldModel;
-  memcpy(&oldModel, &model, sizeof(oldModel));
-  ModelData & newModel = model;
-  memset(&newModel, 0, sizeof(ModelData));
-
-  char name[LEN_MODEL_NAME+1];
-  zchar2str(name, oldModel.header.name, LEN_MODEL_NAME);
-  TRACE("Model %s conversion from v217 to v218", name);
-
-  newModel.header = oldModel.header;
-  for (uint8_t i=0; i<MAX_TIMERS; i++) {
-    if (oldModel.timers[i].mode >= TMRMODE_COUNT)
-      newModel.timers[i].mode = TMRMODE_COUNT + ConvertSwitch_217_to_218(oldModel.timers[i].mode - TMRMODE_COUNT + 1) - 1;
-    else
-      newModel.timers[i].mode = ConvertSwitch_217_to_218(oldModel.timers[i].mode);
-    if (oldModel.timers[i].mode)
-      TRACE("timer mode %d => %d", oldModel.timers[i].mode, newModel.timers[i].mode);
-    newModel.timers[i].start = oldModel.timers[i].start;
-    newModel.timers[i].value = oldModel.timers[i].value;
-    newModel.timers[i].countdownBeep = oldModel.timers[i].countdownBeep;
-    newModel.timers[i].minuteBeep = oldModel.timers[i].minuteBeep;
-    newModel.timers[i].persistent = oldModel.timers[i].persistent;
-    memcpy(newModel.timers[i].name, oldModel.timers[i].name, sizeof(newModel.timers[i].name));
-  }
-  newModel.telemetryProtocol = oldModel.telemetryProtocol;
-  newModel.thrTrim = oldModel.thrTrim;
-  newModel.noGlobalFunctions = oldModel.noGlobalFunctions;
-  newModel.displayTrims = oldModel.displayTrims;
-  newModel.ignoreSensorIds = oldModel.ignoreSensorIds;
-  newModel.trimInc = oldModel.trimInc;
-  newModel.disableThrottleWarning = oldModel.disableThrottleWarning;
-  newModel.displayChecklist = oldModel.displayChecklist;
-  newModel.extendedLimits = oldModel.extendedLimits;
-  newModel.extendedTrims = oldModel.extendedTrims;
-  newModel.throttleReversed = oldModel.throttleReversed;
-  newModel.beepANACenter = oldModel.beepANACenter;
-  for (int i=0; i<MAX_MIXERS; i++) {
-    newModel.mixData[i].destCh = oldModel.mixData[i].destCh;
-    newModel.mixData[i].flightModes = oldModel.mixData[i].flightModes;
-    newModel.mixData[i].mltpx = oldModel.mixData[i].mltpx;
-    newModel.mixData[i].carryTrim = oldModel.mixData[i].carryTrim;
-    newModel.mixData[i].mixWarn = oldModel.mixData[i].mixWarn;
-    newModel.mixData[i].weight = oldModel.mixData[i].weight;
-    newModel.mixData[i].swtch = ConvertSwitch_217_to_218(oldModel.mixData[i].swtch);
-#if defined(PCBTARANIS)
-    newModel.mixData[i].curve = oldModel.mixData[i].curve;
-#else
-    newModel.mixData[i].curveMode = oldModel.mixData[i].curveMode;
-    newModel.mixData[i].noExpo = oldModel.mixData[i].noExpo;
-    newModel.mixData[i].curveParam = oldModel.mixData[i].curveParam;
-#endif
-    newModel.mixData[i].delayUp = oldModel.mixData[i].delayUp;
-    newModel.mixData[i].delayDown = oldModel.mixData[i].delayDown;
-    newModel.mixData[i].speedUp = oldModel.mixData[i].speedUp;
-    newModel.mixData[i].speedDown = oldModel.mixData[i].speedDown;
-    newModel.mixData[i].srcRaw = oldModel.mixData[i].srcRaw;
-    newModel.mixData[i].offset = oldModel.mixData[i].offset;
-    memcpy(newModel.mixData[i].name, oldModel.mixData[i].name, sizeof(newModel.mixData[i].name));
-  }
-  for (int i=0; i<NUM_CHNOUT; i++) {
-    newModel.limitData[i] = oldModel.limitData[i];
-#if defined(PCBTARANIS)
-    if (newModel.moduleData[INTERNAL_MODULE].type == MODULE_TYPE_XJT || newModel.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_XJT) {
-      newModel.limitData[i].ppmCenter = (oldModel.limitData[i].ppmCenter * 612) / 1024;
-    }
-#endif
-  }
-  for (int i=0; i<MAX_EXPOS; i++) {
-#if defined(PCBTARANIS)
-    newModel.expoData[i].srcRaw = oldModel.expoData[i].srcRaw;
-    newModel.expoData[i].scale = oldModel.expoData[i].scale;
-    newModel.expoData[i].carryTrim = oldModel.expoData[i].carryTrim;
-    newModel.expoData[i].curve = oldModel.expoData[i].curve;
-    newModel.expoData[i].offset = oldModel.expoData[i].offset;
-#else
-    newModel.expoData[i].curveMode = oldModel.expoData[i].curveMode;
-    newModel.expoData[i].curveParam = oldModel.expoData[i].curveParam;
-#endif
-    newModel.expoData[i].chn = oldModel.expoData[i].chn;
-    newModel.expoData[i].swtch = ConvertSwitch_217_to_218(oldModel.expoData[i].swtch);
-    newModel.expoData[i].flightModes = oldModel.expoData[i].flightModes;
-    newModel.expoData[i].weight = oldModel.expoData[i].weight;
-    newModel.expoData[i].mode = oldModel.expoData[i].mode;
-    memcpy(newModel.expoData[i].name, oldModel.expoData[i].name, sizeof(newModel.expoData[i].name));
-  }
-  for (int i=0; i<MAX_CURVES; i++) {
-#if defined(XCURVES)
-    newModel.curves[i].type = oldModel.curves[i].type;
-    newModel.curves[i].smooth = oldModel.curves[i].smooth;
-    newModel.curves[i].points = oldModel.curves[i].points;
-    memcpy(newModel.curves[i].name, oldModel.curveNames[i], sizeof(newModel.curves[i].name));
-#else
-    newModel.curves[i] = oldModel.curves[i];
-#endif
-  }
-  memcpy(newModel.points, oldModel.points, sizeof(newModel.points));
-  for (int i=0; i<32; i++) {
-    LogicalSwitchData & sw = newModel.logicalSw[i];
-    sw.func = oldModel.logicalSw[i].func;
-    sw.v1 = oldModel.logicalSw[i].v1;
-    sw.v2 = oldModel.logicalSw[i].v2;
-    sw.v3 = oldModel.logicalSw[i].v3;
-    newModel.logicalSw[i].andsw = ConvertSwitch_217_to_218(oldModel.logicalSw[i].andsw);
-    sw.delay = oldModel.logicalSw[i].delay;
-    sw.duration = oldModel.logicalSw[i].duration;
-    uint8_t cstate = lswFamily(sw.func);
-    if (cstate == LS_FAMILY_OFS || cstate == LS_FAMILY_COMP || cstate == LS_FAMILY_DIFF) {
-      sw.v1 = ConvertSource_217_to_218((uint8_t)sw.v1);
-      if (cstate == LS_FAMILY_COMP) {
-        sw.v2 = ConvertSource_217_to_218((uint8_t)sw.v2);
-      }
-    }
-    else if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY) {
-      sw.v1 = ConvertSwitch_217_to_218(sw.v1);
-      sw.v2 = ConvertSwitch_217_to_218(sw.v2);
-    }
-    else if (cstate == LS_FAMILY_EDGE) {
-      sw.v1 = ConvertSwitch_217_to_218(sw.v1);
-    }
-  }
-  ConvertSpecialFunctions_217_to_218(newModel.customFn, oldModel.customFn);
-  newModel.swashR = oldModel.swashR;
-  for (int i=0; i<MAX_FLIGHT_MODES; i++) {
-    memcpy(newModel.flightModeData[i].trim, oldModel.flightModeData[i].trim, sizeof(newModel.flightModeData[i].trim));
-    memcpy(newModel.flightModeData[i].name, oldModel.flightModeData[i].name, sizeof(newModel.flightModeData[i].name));
-    newModel.flightModeData[i].swtch = ConvertSwitch_217_to_218(oldModel.flightModeData[i].swtch);
-    newModel.flightModeData[i].fadeIn = oldModel.flightModeData[i].fadeIn;
-    newModel.flightModeData[i].fadeOut = oldModel.flightModeData[i].fadeOut;
-#if defined(PCBSKY9X)
-    memcpy(newModel.flightModeData[i].rotaryEncoders, oldModel.flightModeData[i].rotaryEncoders, sizeof(newModel.flightModeData[i].rotaryEncoders));
-#endif
-    memcpy(newModel.flightModeData[i].gvars, oldModel.flightModeData[i].gvars, sizeof(newModel.flightModeData[i].gvars));
-  }
-  newModel.thrTraceSrc = oldModel.thrTraceSrc;
-  newModel.switchWarningState = oldModel.switchWarningState;
-  newModel.switchWarningEnable = oldModel.switchWarningEnable;
-  memcpy(newModel.gvars, oldModel.gvars, sizeof(newModel.gvars));
-  newModel.frsky = oldModel.frsky;
-  for (int i=0; i<NUM_MODULES+1; i++) {
-    newModel.moduleData[i] = oldModel.moduleData[i];
-  }
-#if defined(PCBTARANIS)
-  newModel.trainerMode = oldModel.trainerMode;
-  memcpy(newModel.scriptsData, oldModel.scriptsData, sizeof(newModel.scriptsData));
-  memcpy(newModel.inputNames, oldModel.inputNames, sizeof(newModel.inputNames));
-#endif
-  newModel.potsWarnMode = oldModel.potsWarnMode;
-  newModel.potsWarnEnabled = oldModel.potsWarnEnabled;
-  memcpy(newModel.potsWarnPosition, oldModel.potsWarnPosition, sizeof(newModel.potsWarnPosition));
-  for (int i=0; i<MAX_SENSORS; i++) {
-    newModel.telemetrySensors[i] = oldModel.telemetrySensors[i];
-    if (newModel.telemetrySensors[i].unit > UNIT_WATTS)
-      newModel.telemetrySensors[i].unit += 1;
-  }
-#if defined(PCBTARANIS) && defined(REV9E)
-  newModel.toplcdTimer = oldModel.toplcdTimer;
-#endif
+//  assert(sizeof(ModelData_v217) <= sizeof(ModelData));
+//
+//  ModelData_v217 oldModel;
+//  memcpy(&oldModel, &model, sizeof(oldModel));
+//  ModelData & newModel = model;
+//  memset(&newModel, 0, sizeof(ModelData));
+//
+//  char name[LEN_MODEL_NAME+1];
+//  zchar2str(name, oldModel.header.name, LEN_MODEL_NAME);
+//  TRACE("Model %s conversion from v217 to v218", name);
+//
+//  newModel.header = oldModel.header;
+//  for (uint8_t i=0; i<MAX_TIMERS; i++) {
+//    if (oldModel.timers[i].mode >= TMRMODE_COUNT)
+//      newModel.timers[i].mode = TMRMODE_COUNT + ConvertSwitch_217_to_218(oldModel.timers[i].mode - TMRMODE_COUNT + 1) - 1;
+//    else
+//      newModel.timers[i].mode = ConvertSwitch_217_to_218(oldModel.timers[i].mode);
+//    if (oldModel.timers[i].mode)
+//      TRACE("timer mode %d => %d", oldModel.timers[i].mode, newModel.timers[i].mode);
+//    newModel.timers[i].start = oldModel.timers[i].start;
+//    newModel.timers[i].value = oldModel.timers[i].value;
+//    newModel.timers[i].countdownBeep = oldModel.timers[i].countdownBeep;
+//    newModel.timers[i].minuteBeep = oldModel.timers[i].minuteBeep;
+//    newModel.timers[i].persistent = oldModel.timers[i].persistent;
+//    memcpy(newModel.timers[i].name, oldModel.timers[i].name, sizeof(newModel.timers[i].name));
+//  }
+//  newModel.telemetryProtocol = oldModel.telemetryProtocol;
+//  newModel.thrTrim = oldModel.thrTrim;
+//  newModel.noGlobalFunctions = oldModel.noGlobalFunctions;
+//  newModel.displayTrims = oldModel.displayTrims;
+//  newModel.ignoreSensorIds = oldModel.ignoreSensorIds;
+//  newModel.trimInc = oldModel.trimInc;
+//  newModel.disableThrottleWarning = oldModel.disableThrottleWarning;
+//  newModel.displayChecklist = oldModel.displayChecklist;
+//  newModel.extendedLimits = oldModel.extendedLimits;
+//  newModel.extendedTrims = oldModel.extendedTrims;
+//  newModel.throttleReversed = oldModel.throttleReversed;
+//  newModel.beepANACenter = oldModel.beepANACenter;
+//  for (int i=0; i<MAX_MIXERS; i++) {
+//    newModel.mixData[i].destCh = oldModel.mixData[i].destCh;
+//    newModel.mixData[i].flightModes = oldModel.mixData[i].flightModes;
+//    newModel.mixData[i].mltpx = oldModel.mixData[i].mltpx;
+//    newModel.mixData[i].carryTrim = oldModel.mixData[i].carryTrim;
+//    newModel.mixData[i].mixWarn = oldModel.mixData[i].mixWarn;
+//    newModel.mixData[i].weight = oldModel.mixData[i].weight;
+//    newModel.mixData[i].swtch = ConvertSwitch_217_to_218(oldModel.mixData[i].swtch);
+//#if defined(PCBTARANIS)
+//    newModel.mixData[i].curve = oldModel.mixData[i].curve;
+//#else
+//    newModel.mixData[i].curveMode = oldModel.mixData[i].curveMode;
+//    newModel.mixData[i].noExpo = oldModel.mixData[i].noExpo;
+//    newModel.mixData[i].curveParam = oldModel.mixData[i].curveParam;
+//#endif
+//    newModel.mixData[i].delayUp = oldModel.mixData[i].delayUp;
+//    newModel.mixData[i].delayDown = oldModel.mixData[i].delayDown;
+//    newModel.mixData[i].speedUp = oldModel.mixData[i].speedUp;
+//    newModel.mixData[i].speedDown = oldModel.mixData[i].speedDown;
+//    newModel.mixData[i].srcRaw = oldModel.mixData[i].srcRaw;
+//    newModel.mixData[i].offset = oldModel.mixData[i].offset;
+//    memcpy(newModel.mixData[i].name, oldModel.mixData[i].name, sizeof(newModel.mixData[i].name));
+//  }
+//  for (int i=0; i<NUM_CHNOUT; i++) {
+//    newModel.limitData[i] = oldModel.limitData[i];
+//#if defined(PCBTARANIS)
+//    if (newModel.moduleData[INTERNAL_MODULE].type == MODULE_TYPE_XJT || newModel.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_XJT) {
+//      newModel.limitData[i].ppmCenter = (oldModel.limitData[i].ppmCenter * 612) / 1024;
+//    }
+//#endif
+//  }
+//  for (int i=0; i<MAX_EXPOS; i++) {
+//#if defined(PCBTARANIS)
+//    newModel.expoData[i].srcRaw = oldModel.expoData[i].srcRaw;
+//    newModel.expoData[i].scale = oldModel.expoData[i].scale;
+//    newModel.expoData[i].carryTrim = oldModel.expoData[i].carryTrim;
+//    newModel.expoData[i].curve = oldModel.expoData[i].curve;
+//    newModel.expoData[i].offset = oldModel.expoData[i].offset;
+//#else
+//    newModel.expoData[i].curveMode = oldModel.expoData[i].curveMode;
+//    newModel.expoData[i].curveParam = oldModel.expoData[i].curveParam;
+//#endif
+//    newModel.expoData[i].chn = oldModel.expoData[i].chn;
+//    newModel.expoData[i].swtch = ConvertSwitch_217_to_218(oldModel.expoData[i].swtch);
+//    newModel.expoData[i].flightModes = oldModel.expoData[i].flightModes;
+//    newModel.expoData[i].weight = oldModel.expoData[i].weight;
+//    newModel.expoData[i].mode = oldModel.expoData[i].mode;
+//    memcpy(newModel.expoData[i].name, oldModel.expoData[i].name, sizeof(newModel.expoData[i].name));
+//  }
+//  for (int i=0; i<MAX_CURVES; i++) {
+//#if defined(XCURVES)
+//    newModel.curves[i].type = oldModel.curves[i].type;
+//    newModel.curves[i].smooth = oldModel.curves[i].smooth;
+//    newModel.curves[i].points = oldModel.curves[i].points;
+//    memcpy(newModel.curves[i].name, oldModel.curveNames[i], sizeof(newModel.curves[i].name));
+//#else
+//    newModel.curves[i] = oldModel.curves[i];
+//#endif
+//  }
+//  memcpy(newModel.points, oldModel.points, sizeof(newModel.points));
+//  for (int i=0; i<32; i++) {
+//    LogicalSwitchData & sw = newModel.logicalSw[i];
+//    sw.func = oldModel.logicalSw[i].func;
+//    sw.v1 = oldModel.logicalSw[i].v1;
+//    sw.v2 = oldModel.logicalSw[i].v2;
+//    sw.v3 = oldModel.logicalSw[i].v3;
+//    newModel.logicalSw[i].andsw = ConvertSwitch_217_to_218(oldModel.logicalSw[i].andsw);
+//    sw.delay = oldModel.logicalSw[i].delay;
+//    sw.duration = oldModel.logicalSw[i].duration;
+//    uint8_t cstate = lswFamily(sw.func);
+//    if (cstate == LS_FAMILY_OFS || cstate == LS_FAMILY_COMP || cstate == LS_FAMILY_DIFF) {
+//      sw.v1 = ConvertSource_217_to_218((uint8_t)sw.v1);
+//      if (cstate == LS_FAMILY_COMP) {
+//        sw.v2 = ConvertSource_217_to_218((uint8_t)sw.v2);
+//      }
+//    }
+//    else if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY) {
+//      sw.v1 = ConvertSwitch_217_to_218(sw.v1);
+//      sw.v2 = ConvertSwitch_217_to_218(sw.v2);
+//    }
+//    else if (cstate == LS_FAMILY_EDGE) {
+//      sw.v1 = ConvertSwitch_217_to_218(sw.v1);
+//    }
+//  }
+//  ConvertSpecialFunctions_217_to_218(newModel.customFn, oldModel.customFn);
+//  newModel.swashR = oldModel.swashR;
+//  for (int i=0; i<MAX_FLIGHT_MODES; i++) {
+//    memcpy(newModel.flightModeData[i].trim, oldModel.flightModeData[i].trim, sizeof(newModel.flightModeData[i].trim));
+//    memcpy(newModel.flightModeData[i].name, oldModel.flightModeData[i].name, sizeof(newModel.flightModeData[i].name));
+//    newModel.flightModeData[i].swtch = ConvertSwitch_217_to_218(oldModel.flightModeData[i].swtch);
+//    newModel.flightModeData[i].fadeIn = oldModel.flightModeData[i].fadeIn;
+//    newModel.flightModeData[i].fadeOut = oldModel.flightModeData[i].fadeOut;
+//#if defined(PCBSKY9X)
+//    memcpy(newModel.flightModeData[i].rotaryEncoders, oldModel.flightModeData[i].rotaryEncoders, sizeof(newModel.flightModeData[i].rotaryEncoders));
+//#endif
+//    memcpy(newModel.flightModeData[i].gvars, oldModel.flightModeData[i].gvars, sizeof(newModel.flightModeData[i].gvars));
+//  }
+//  newModel.thrTraceSrc = oldModel.thrTraceSrc;
+//  newModel.switchWarningState = oldModel.switchWarningState;
+//  newModel.switchWarningEnable = oldModel.switchWarningEnable;
+//  memcpy(newModel.gvars, oldModel.gvars, sizeof(newModel.gvars));
+//  newModel.frsky = oldModel.frsky;
+//  for (int i=0; i<NUM_MODULES+1; i++) {
+//    newModel.moduleData[i] = oldModel.moduleData[i];
+//  }
+//#if defined(PCBTARANIS)
+//  newModel.trainerMode = oldModel.trainerMode;
+//  memcpy(newModel.scriptsData, oldModel.scriptsData, sizeof(newModel.scriptsData));
+//  memcpy(newModel.inputNames, oldModel.inputNames, sizeof(newModel.inputNames));
+//#endif
+//  newModel.potsWarnMode = oldModel.potsWarnMode;
+//  newModel.potsWarnEnabled = oldModel.potsWarnEnabled;
+//  memcpy(newModel.potsWarnPosition, oldModel.potsWarnPosition, sizeof(newModel.potsWarnPosition));
+//  for (int i=0; i<MAX_SENSORS; i++) {
+//    newModel.telemetrySensors[i] = oldModel.telemetrySensors[i];
+//    if (newModel.telemetrySensors[i].unit > UNIT_WATTS)
+//      newModel.telemetrySensors[i].unit += 1;
+//  }
+//#if defined(PCBTARANIS) && defined(REV9E)
+//  newModel.toplcdTimer = oldModel.toplcdTimer;
+//#endif
 }
 
 void ConvertModel(int id, int version)

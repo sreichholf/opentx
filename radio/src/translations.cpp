@@ -666,6 +666,18 @@ const pm_char STR_MODEL_SELECT[] PROGMEM = TR_MODEL_SELECT;
   const pm_char STR_JITTER_FILTER[] PROGMEM = TR_JITTER_FILTER;
 #endif
 
+#if defined(PCBSKY9X)
+  const pm_char STR_CURVE_PRESET[] PROGMEM = TR_CURVE_PRESET;
+  const pm_char STR_PRESET[] PROGMEM = TR_PRESET;
+  const pm_char STR_MIRROR[] PROGMEM = TR_MIRROR;
+  const pm_char STR_CLEAR[] PROGMEM = TR_CLEAR;
+  const pm_char STR_COUNT[] PROGMEM = TR_COUNT;
+  const pm_char STR_PTS[] PROGMEM = TR_PTS;
+  const pm_char STR_SMOOTH[] PROGMEM = TR_SMOOTH;
+  const pm_char STR_SCALE[] PROGMEM = TR_SCALE;
+  const pm_char STR_INPUTNAME[] PROGMEM = TR_INPUT;
+#endif
+
 #if MENUS_LOCK == 1
   const pm_char STR_UNLOCKED[] PROGMEM = TR_UNLOCKED;
   const pm_char STR_MODS_FORBIDDEN[] PROGMEM = TR_MODS_FORBIDDEN;

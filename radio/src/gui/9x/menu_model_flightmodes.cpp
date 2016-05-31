@@ -102,7 +102,7 @@ void menuModelPhaseOne(uint8_t event)
         for (uint8_t t=0; t<NUM_STICKS; t++) {
           putsTrimMode(MIXES_2ND_COLUMN+(t*FW), y, s_currIdx, t, menuHorizontalPosition==t ? attr : 0);
           if (attr && menuHorizontalPosition==t && ((editMode>0) || p1valdiff)) {
-            int16_t v = getRawTrimValue(s_currIdx, t);
+            int16_t v = getRawTrimValue(s_currIdx, t).value;
             if (v < TRIM_EXTENDED_MAX) v = TRIM_EXTENDED_MAX;
             v = checkIncDec(event, v, TRIM_EXTENDED_MAX, TRIM_EXTENDED_MAX+MAX_FLIGHT_MODES-1, EE_MODEL);
             if (checkIncDec_Ret) {

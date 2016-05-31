@@ -292,7 +292,7 @@ extern const pm_char STR_OPEN9X[];
 #define STR_VKEYS               (STR_OPEN9X + OFS_VKEYS)
 #define STR_VSWITCHES           (STR_OPEN9X + OFS_VSWITCHES)
 #define STR_VSRCRAW             (STR_OPEN9X + OFS_VSRCRAW)
-#if defined(TRANSLATIONS_CZ) && defined(CPUARM)
+#if defined(CPUARM)
 #define STR_INPUTNAMES          (STR_OPEN9X + OFS_INPUTNAMES)
 #endif
 #define STR_VTMRMODES           (STR_OPEN9X + OFS_VTMRMODES)
@@ -880,7 +880,6 @@ extern const pm_char STR_BLCOLOR[];
   extern const pm_char STR_WIDGET_SETTINGS[];
   extern const pm_char STR_REMOVE_SCREEN[];
 #endif
-
 #if defined(PCBTARANIS) || defined(PCBFLAMENCO) || defined(PCBHORUS)
   extern const pm_char STR_BYTES[];
   extern const pm_char STR_ANTENNAPROBLEM[];
@@ -932,6 +931,18 @@ extern const pm_char STR_BLCOLOR[];
   extern const pm_char STR_MENU_OTHER[];
   extern const pm_char STR_MENU_INVERT[];
   extern const pm_char STR_JITTER_FILTER[];
+#endif
+
+#if defined(PCBSKY9X)
+  extern const pm_char STR_SCALE[];
+  extern const pm_char STR_CURVE_PRESET[];
+  extern const pm_char STR_PRESET[];
+  extern const pm_char STR_MIRROR[];
+  extern const pm_char STR_CLEAR[];
+  extern const pm_char STR_COUNT[];
+  extern const pm_char STR_SMOOTH[];
+  extern const pm_char STR_PTS[];
+  extern const pm_char STR_INPUTNAME[];
 #endif
 
 #if MENUS_LOCK == 1

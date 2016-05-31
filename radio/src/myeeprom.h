@@ -36,8 +36,8 @@
 #define BEEP_VAL     ( (g_eeGeneral.warnOpts & WARN_BVAL_BIT) >>3 )
 
 #if defined(CPUARM)
-  #define EEPROM_VER             218
-  #define FIRST_CONV_EEPROM_VER  216
+  #define EEPROM_VER             219
+  #define FIRST_CONV_EEPROM_VER  219
 #elif defined(CPUM2560) || defined(CPUM2561)
   #define EEPROM_VER             217
   #define FIRST_CONV_EEPROM_VER  EEPROM_VER

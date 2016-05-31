@@ -1476,6 +1476,10 @@ tmr10ms_t jitterResetTime = 0;
 uint16_t anaIn(uint8_t chan)
 {
 #if defined(VIRTUALINPUTS)
+  #if defined(PCBSKY9X) && !defined(REVA)
+    static const uint8_t crossAna[]={1,5,7,0,4,6,2,3};
+    chan = crossAna[chan];
+  #endif
   return ANA_FILT(chan);
 #elif defined(PCBSKY9X) && !defined(REVA)
   static const uint8_t crossAna[]={1,5,7,0,4,6,2,3};
@@ -2493,6 +2497,7 @@ void opentxInit(OPENTX_INIT_ARGS)
     storageReadAll();
   }
 #else
+  storageEraseAll(true);
   storageReadAll();
 #endif
 

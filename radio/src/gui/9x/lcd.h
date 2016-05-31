@@ -181,6 +181,9 @@ void putsTrimMode(coord_t x, coord_t y, uint8_t phase, uint8_t idx, LcdFlags att
 #if defined(ROTARY_ENCODERS)
   void putsRotaryEncoderMode(coord_t x, coord_t y, uint8_t phase, uint8_t idx, LcdFlags att);
 #endif
+#if defined(VIRTUALINPUTS)
+void putsCurveRef(coord_t x, coord_t y, CurveRef &curve, LcdFlags att);
+#endif
 
 #define putsChn(x, y, idx, att) putsMixerSource(x, y, MIXSRC_CH1+idx-1, att)
 void putsChnLetter(coord_t x, coord_t y, uint8_t idx, LcdFlags attr);

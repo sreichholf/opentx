@@ -33,6 +33,11 @@
   typedef uint8_t vertpos_t;
 #endif
 
+extern int8_t s_currCh;
+extern uint8_t s_maxLines;
+extern uint8_t s_copySrcIdx;
+extern uint8_t s_copySrcCh;
+
 typedef uint8_t check_event_t;
 #define horzpos_t uint8_t
 
@@ -416,6 +421,9 @@ void editName(coord_t x, coord_t y, char *name, uint8_t size, uint8_t event, uin
 #else
 void editSingleName(coord_t x, coord_t y, const pm_char *label, char *name, uint8_t size, uint8_t event, uint8_t active);
 #endif
+
+void editCurveRef(coord_t x, coord_t y, CurveRef & curve, uint8_t event, uint8_t attr);
+FlightModesType editFlightModes(coord_t x, coord_t y, uint8_t event, FlightModesType value, uint8_t attr);
 
 uint8_t editDelay(const coord_t y, const uint8_t event, const uint8_t attr, const pm_char * str, uint8_t delay);
 #define EDIT_DELAY(x, y, event, attr, str, delay) editDelay(y, event, attr, str, delay)

@@ -87,6 +87,8 @@
   #define MAX_FLIGHT_MODES     9
   #define MAX_MIXERS           64
   #define MAX_EXPOS            32
+  #define MAX_SCRIPTS           0
+  #define MAX_INPUTS           32
   #define NUM_LOGICAL_SWITCH   64 // number of custom switches
   #define NUM_CFN              64 // number of functions assigned to switches
   #define NUM_TRAINER          16
@@ -185,10 +187,13 @@ enum CurveType {
   #define MAX_CURVES                   32
   #define NUM_POINTS                   512
 #elif defined(CPUARM)
-  #define LEN_MODEL_NAME               10
+    #define LEN_MODEL_NAME               10
   #define LEN_TIMER_NAME               3
   #define LEN_FLIGHT_MODE_NAME         6
   #define LEN_EXPOMIX_NAME             6
+  #define LEN_CHANNEL_NAME             6
+  #define LEN_INPUT_NAME               4
+  #define LEN_CURVE_NAME               3
   #define LEN_CFN_NAME                 6
   #define MAX_CURVES                   16
   #define NUM_POINTS                   512
@@ -333,6 +338,9 @@ enum UartModes {
   #define LEN_SWITCH_NAME              3
   #define LEN_ANA_NAME                 3
   #define LEN_BLUETOOTH_NAME           10
+#elif defined(PCBSKY9X)
+  #define LEN_SWITCH_NAME              3
+  #define LEN_ANA_NAME                 3
 #endif
 
 #if defined(CPUARM)

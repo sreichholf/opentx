@@ -33,7 +33,7 @@ enum CalibrationState {
 
 void menuCommonCalib(uint8_t event)
 {
-  for (uint8_t i=0; i<NUM_STICKS+NUM_POTS; i++) { // get low and high vals for sticks and trims
+  for (uint8_t i=0; i<=POT_LAST; i++) { // get low and high vals for sticks and trims
     int16_t vt = anaIn(i);
     reusableBuffer.calib.loVals[i] = min(vt, reusableBuffer.calib.loVals[i]);
     reusableBuffer.calib.hiVals[i] = max(vt, reusableBuffer.calib.hiVals[i]);
@@ -70,7 +70,7 @@ void menuCommonCalib(uint8_t event)
       lcdDrawText(0*FW, MENU_HEADER_HEIGHT+FH, STR_SETMIDPOINT, INVERS);
       lcd_putsLeft(MENU_HEADER_HEIGHT+2*FH, STR_MENUWHENDONE);
 
-      for (uint8_t i=0; i<NUM_STICKS+NUM_POTS; i++) {
+      for (uint8_t i=0; i<=POT_LAST; i++) {
         reusableBuffer.calib.loVals[i] = 15000;
         reusableBuffer.calib.hiVals[i] = -15000;
         reusableBuffer.calib.midVals[i] = anaIn(i);
@@ -83,7 +83,7 @@ void menuCommonCalib(uint8_t event)
       lcdDrawText(0*FW, MENU_HEADER_HEIGHT+FH, STR_MOVESTICKSPOTS, INVERS);
       lcd_putsLeft(MENU_HEADER_HEIGHT+2*FH, STR_MENUWHENDONE);
 
-      for (uint8_t i=0; i<NUM_STICKS+NUM_POTS; i++) {
+      for (uint8_t i=0; i<=POT_LAST; i++) {
         if (abs(reusableBuffer.calib.loVals[i]-reusableBuffer.calib.hiVals[i]) > 50) {
           g_eeGeneral.calib[i].mid = reusableBuffer.calib.midVals[i];
           int16_t v = reusableBuffer.calib.midVals[i] - reusableBuffer.calib.loVals[i];

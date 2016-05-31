@@ -72,9 +72,9 @@ CurveInfo curveInfo(uint8_t idx)
 
 #if defined(XCURVES)
 #define CUSTOM_POINT_X(points, count, idx) ((idx)==0 ? -100 : (((idx)==(count)-1) ? 100 : points[(count)+(idx)-1]))
-s32 compute_tangent(CurveInfo * crv, int8_t * points, int i)
+int32_t compute_tangent(CurveInfo * crv, int8_t * points, int i)
 {
-    s32 m=0;
+    int32_t m=0;
     uint8_t num_points = crv->points + 5;
     #define MMULT 1024
     if (i == 0) {
@@ -86,7 +86,7 @@ s32 compute_tangent(CurveInfo * crv, int8_t * points, int i)
         if (x1 > x0) m = (MMULT * (points[1] - points[0])) / (x1 - x0);
       }
       else {
-        s32 delta = (2 * 100) / (num_points - 1);
+        int32_t delta = (2 * 100) / (num_points - 1);
         m = (MMULT * (points[1] - points[0])) / delta;
       }
     }
@@ -99,7 +99,7 @@ s32 compute_tangent(CurveInfo * crv, int8_t * points, int i)
         if (x1 > x0) m = (MMULT * (points[num_points-1] - points[num_points-2])) / (x1 - x0);
       }
       else {
-        s32 delta = (2 * 100) / (num_points - 1);
+        int32_t delta = (2 * 100) / (num_points - 1);
         m = (MMULT * (points[num_points-1] - points[num_points-2])) / delta;
       }
     }
@@ -107,7 +107,7 @@ s32 compute_tangent(CurveInfo * crv, int8_t * points, int i)
         //apply monotone rules from
         //http://en.wikipedia.org/wiki/Monotone_cubic_interpolation
         //1) compute slopes of secant lines
-        s32 d0=0, d1=0;
+        int32_t d0=0, d1=0;
         if (crv->type == CURVE_TYPE_CUSTOM) {
           int8_t x0 = CUSTOM_POINT_X(points, num_points, i-1);
           int8_t x1 = CUSTOM_POINT_X(points, num_points, i);
@@ -116,7 +116,7 @@ s32 compute_tangent(CurveInfo * crv, int8_t * points, int i)
           if (x2 > x1) d1 = (MMULT * (points[i+1] - points[i])) / (x2 - x1);
         }
         else {
-          s32 delta = (2 * 100) / (num_points - 1);
+          int32_t delta = (2 * 100) / (num_points - 1);
           d0 = (MMULT * (points[i] - points[i-1])) / (delta);
           d1 = (MMULT * (points[i+1] - points[i])) / (delta);
         }
@@ -154,7 +154,7 @@ int16_t hermite_spline(int16_t x, uint8_t idx)
     x = RESX;
 
   for (int i=0; i<count-1; i++) {
-    s32 p0x, p3x;
+    int32_t p0x, p3x;
     if (custom) {
       p0x = (i>0 ? calc100toRESX(points[count+i-1]) : -RESX);
       p3x = (i<count-2 ? calc100toRESX(points[count+i]) : RESX);
@@ -165,19 +165,19 @@ int16_t hermite_spline(int16_t x, uint8_t idx)
     }
 
     if (x >= p0x && x <= p3x) {
-      s32 p0y = calc100toRESX(points[i]);
-      s32 p3y = calc100toRESX(points[i+1]);
-      s32 m0 = compute_tangent(&crv, points, i);
-      s32 m3 = compute_tangent(&crv, points, i+1);
-      s32 y;
-      s32 h = p3x - p0x;
-      s32 t = (h > 0 ? (MMULT * (x - p0x)) / h : 0);
-      s32 t2 = t * t / MMULT;
-      s32 t3 = t2 * t / MMULT;
-      s32 h00 = 2*t3 - 3*t2 + MMULT;
-      s32 h10 = t3 - 2*t2 + t;
-      s32 h01 = -2*t3 + 3*t2;
-      s32 h11 = t3 - t2;
+      int32_t p0y = calc100toRESX(points[i]);
+      int32_t p3y = calc100toRESX(points[i+1]);
+      int32_t m0 = compute_tangent(&crv, points, i);
+      int32_t m3 = compute_tangent(&crv, points, i+1);
+      int32_t y;
+      int32_t h = p3x - p0x;
+      int32_t t = (h > 0 ? (MMULT * (x - p0x)) / h : 0);
+      int32_t t2 = t * t / MMULT;
+      int32_t t3 = t2 * t / MMULT;
+      int32_t h00 = 2*t3 - 3*t2 + MMULT;
+      int32_t h10 = t3 - 2*t2 + t;
+      int32_t h01 = -2*t3 + 3*t2;
+      int32_t h11 = t3 - t2;
       y = p0y * h00 + h * (m0 * h10 / MMULT) + p3y * h01 + h * (m3 * h11 / MMULT);
       y /= MMULT;
       return y;

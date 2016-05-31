@@ -35,6 +35,7 @@ uint8_t editDelay(const coord_t y, const uint8_t event, const uint8_t attr, cons
 uint8_t s_copyMode = 0;
 int8_t s_copySrcRow;
 int8_t s_copyTgtOfs;
+uint8_t s_currIdx;
 
 #if defined(CPUM64)
   #define editNameCursorPos menuHorizontalPosition
@@ -133,5 +134,3 @@ void editSingleName(coord_t x, coord_t y, const pm_char *label, char *name, uint
   editName(x, y, name, size, event, active);
 }
 #endif
-
-uint8_t s_currIdx;

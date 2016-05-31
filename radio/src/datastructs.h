@@ -793,7 +793,8 @@ PACK(struct CustomScreenData {
 #elif defined(PCBTARANIS)
   #define MODELDATA_EXTRA   uint8_t spare:3; uint8_t trainerMode:3; uint8_t potsWarnMode:2; ModuleData moduleData[NUM_MODULES+1]; ScriptData scriptsData[MAX_SCRIPTS]; char inputNames[MAX_INPUTS][LEN_INPUT_NAME]; uint8_t potsWarnEnabled; int8_t potsWarnPosition[NUM_POTS];
 #elif defined(PCBSKY9X)
-  #define MODELDATA_EXTRA   uint8_t spare:6; uint8_t potsWarnMode:2; ModuleData moduleData[NUM_MODULES+1]; uint8_t potsWarnEnabled; int8_t potsWarnPosition[NUM_POTS]; uint8_t rxBattAlarms[2];
+  #define MODELDATA_EXTRA   uint8_t spare:3; uint8_t trainerMode:3; uint8_t potsWarnMode:2; ModuleData moduleData[NUM_MODULES+1]; char inputNames[MAX_INPUTS][LEN_INPUT_NAME]; uint8_t potsWarnEnabled; int8_t potsWarnPosition[NUM_POTS];
+//  #define MODELDATA_EXTRA   uint8_t spare:6; uint8_t potsWarnMode:2; ModuleData moduleData[NUM_MODULES+1]; uint8_t potsWarnEnabled; int8_t potsWarnPosition[NUM_POTS]; uint8_t rxBattAlarms[2]; char inputNames[MAX_INPUTS][LEN_INPUT_NAME];
 #else
   #define MODELDATA_EXTRA
 #endif
@@ -958,9 +959,12 @@ PACK(struct TrainerData {
     int8_t   temperatureCalib; \
     uint8_t  optrexDisplay; \
     uint8_t  sticksGain; \
-    uint8_t  rotarySteps;
+    uint8_t  rotarySteps; \
+    uint32_t switchConfig; \
+    char switchNames[NUM_SWITCHES][LEN_SWITCH_NAME]; \
+    char anaNames[NUM_STICKS+NUM_POTS][LEN_ANA_NAME];
 #elif defined(CPUARM)
-  #define EXTRA_GENERAL_FIELDS  EXTRA_GENERAL_FIELDS_ARM
+  #define EXTRA_GENERAL_FIELDS EXTRA_GENERAL_FIELDS_ARM
 #elif defined(PXX)
   #define EXTRA_GENERAL_FIELDS uint8_t countryCode;
 #else
@@ -1104,19 +1108,19 @@ static inline void check_struct()
 
 #elif defined(PCBSKY9X)
   CHKSIZE(MixData, 20);
-  CHKSIZE(ExpoData, 11);
-  CHKSIZE(LimitData, 5);
+  CHKSIZE(ExpoData, 17);
+  CHKSIZE(LimitData, 13);
   CHKSIZE(CustomFunctionData, 9);
   CHKSIZE(FlightModeData, 38);
   CHKSIZE(TimerData, 11);
-  CHKSIZE(SwashRingData, 3);
+  CHKSIZE(SwashRingData, 8);
   CHKSIZE(FrSkyBarData, 5);
   CHKSIZE(FrSkyLineData, 2);
   CHKSIZE(FrSkyTelemetryData, 90);
   CHKSIZE(ModelHeader, 12);
-  CHKTYPE(CurveData, 2);
-  CHKSIZE(RadioData, 685);
-  CHKSIZE(ModelData, 4671);
+  CHKSIZE(CurveData, 4);
+  CHKSIZE(RadioData, 731);
+  CHKSIZE(ModelData, 5282);
 #else
   // Common for all variants
   CHKSIZE(LimitData, 5);

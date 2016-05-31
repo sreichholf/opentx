@@ -659,6 +659,7 @@
 #define TR_PHASENAME           "Mode Name"
 #define TR_MIXNAME             "Mix Name"
 #define TR_INPUTNAME           "Input Name"
+#define TR_INPUT			   "Input"
 #if defined(VIRTUALINPUTS)
   #define TR_EXPONAME          "Line Name"
 #else

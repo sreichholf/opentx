@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -18,7 +18,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../../opentx.h"
+#include "opentx.h"
 
 uint8_t s_curveChan;
 
@@ -35,17 +35,39 @@ struct point_t {
 point_t getPoint(uint8_t i)
 {
   point_t result = {0, 0};
-  CurveInfo crv = curveInfo(s_curveChan);
-  int8_t *points = crv.crv;
-  bool custom = crv.custom;
-  uint8_t count = crv.points;
+  CurveInfo & crv = g_model.curves[s_curveChan];
+  int8_t * points = curveAddress(s_curveChan);
+  bool custom = (crv.type == CURVE_TYPE_CUSTOM);
+  uint8_t count = 5+crv.points;
   if (i < count) {
-    result.x = X0-1-WCHART+i*WCHART/(count/2);
+    result.x = X0-1-WCHART+i*WCHART*2/(count-1);
     result.y = (LCD_H-1) - (100 + points[i]) * (LCD_H-1) / 200;
     if (custom && i>0 && i<count-1)
       result.x = X0-1-WCHART + (100 + (100 + points[count+i-1]) * (2*WCHART)) / 200;
   }
   return result;
+}
+
+void drawFunction(FnFuncP fn, uint8_t offset)
+{
+  lcdDrawVerticalLine(X0-offset, 0, LCD_H, 0xee);
+  lcdDrawHorizontalLine(X0-WCHART-offset, Y0, WCHART*2, 0xee);
+
+  coord_t prev_yv = (coord_t)-1;
+
+  for (int8_t xv=-WCHART; xv<=WCHART; xv++) {
+    coord_t yv = (LCD_H-1) - (((uint16_t)RESX + fn(xv * (RESX/WCHART))) / 2 * (LCD_H-1) / RESX);
+    if (prev_yv != (coord_t)-1) {
+      if (abs((int8_t)yv-prev_yv) <= 1) {
+        lcdDrawPoint(X0+xv-offset-1, prev_yv, FORCE);
+      }
+      else {
+        uint8_t tmp = (prev_yv < yv ? 0 : 1);
+        lcdDrawSolidVerticalLine(X0+xv-offset-1, yv+tmp, prev_yv-yv);
+      }
+    }
+    prev_yv = yv;
+  }
 }
 
 void DrawCurve(uint8_t offset=0)
@@ -61,199 +83,259 @@ void DrawCurve(uint8_t offset=0)
   } while(1);
 }
 
-bool moveCurve(uint8_t index, int8_t shift, int8_t custom=0)
+extern int8_t * curveEnd[MAX_CURVES];
+bool moveCurve(uint8_t index, int8_t shift)
 {
-  if (g_model.curves[MAX_CURVES-1] + shift > NUM_POINTS-5*MAX_CURVES) {
+  if (curveEnd[MAX_CURVES-1] + shift > g_model.points + sizeof(g_model.points)) {
     AUDIO_WARNING2();
     return false;
   }
 
-  int8_t *crv = curveAddress(index);
-  if (shift < 0) {
-    for (uint8_t i=0; i<custom; i++)
-      crv[i] = crv[2*i];
-  }
-
   int8_t *nextCrv = curveAddress(index+1);
-  memmove(nextCrv+shift, nextCrv, 5*(MAX_CURVES-index-1)+g_model.curves[MAX_CURVES-1]-g_model.curves[index]);
+  memmove(nextCrv+shift, nextCrv, 5*(MAX_CURVES-index-1)+curveEnd[MAX_CURVES-1]-curveEnd[index]);
   if (shift < 0) memclear(&g_model.points[NUM_POINTS-1] + shift, -shift);
-  while (index<MAX_CURVES)
-    g_model.curves[index++] += shift;
-
-  for (uint8_t i=0; i<custom-2; i++)
-    crv[custom+i] = -100 + ((200 * (i+1) + custom/2) / (custom-1)) ;
+  while (index<MAX_CURVES) {
+    curveEnd[index++] += shift;
+  }
 
   storageDirty(EE_MODEL);
   return true;
 }
 
-void menuModelCurveOne(uint8_t event)
+int8_t getCurveX(int noPoints, int point)
 {
-  TITLE(STR_MENUCURVE);
-  lcdDrawNumber(PSIZE(TR_MENUCURVE)*FW+1, 0, s_curveChan+1, INVERS|LEFT);
-  DISPLAY_PROGRESS_BAR(20*FW+1);
+  return -100 + div_and_round((point*2000) / (noPoints-1), 10);
+}
 
-  CurveInfo crv = curveInfo(s_curveChan);
-
-  switch(event) {
-    case EVT_ENTRY:
-      s_editMode = 1;
-      break;
-    CASE_EVT_ROTARY_BREAK
-    case EVT_KEY_BREAK(KEY_ENTER):
-      if (s_editMode <= 0)
-        menuHorizontalPosition = 0;
-      if (s_editMode == 1 && crv.custom)
-        s_editMode = 2;
-      else
-        s_editMode = 1;
-      break;
-    case EVT_KEY_LONG(KEY_ENTER):
-      if (s_editMode <= 0) {
-        if (int8_t(++menuHorizontalPosition) > 4)
-          menuHorizontalPosition = -4;
-        for (uint8_t i=0; i<crv.points; i++)
-          crv.crv[i] = (i-(crv.points/2)) * int8_t(menuHorizontalPosition) * 50 / (crv.points-1);
-        storageDirty(EE_MODEL);
-        killEvents(event);
-      }
-      break;
-    case EVT_KEY_BREAK(KEY_EXIT):
-      if (s_editMode > 0) {
-        if (--s_editMode == 0)
-          menuHorizontalPosition = 0;
-      }
-      else {
-        popMenu();
-      }
-      break;
-
-    /* CASE_EVT_ROTARY_LEFT */
-    case EVT_KEY_REPT(KEY_LEFT):
-    case EVT_KEY_FIRST(KEY_LEFT):
-      if (s_editMode==1 && menuHorizontalPosition>0) menuHorizontalPosition--;
-      if (s_editMode <= 0) {
-        if (crv.custom) {
-          moveCurve(s_curveChan, -crv.points+2);
-        }
-        else if (crv.points > MIN_POINTS) {
-          moveCurve(s_curveChan, -1, (crv.points+1)/2);
-        }
-        else {
-          AUDIO_WARNING2();
-        }
-        return;
-      }
-      break;
-
-    /* CASE_EVT_ROTARY_RIGHT */
-    case EVT_KEY_REPT(KEY_RIGHT):
-    case EVT_KEY_FIRST(KEY_RIGHT):
-      if (s_editMode==1 && menuHorizontalPosition<(crv.points-1)) menuHorizontalPosition++;
-      if (s_editMode <= 0) {
-        if (!crv.custom) {
-          moveCurve(s_curveChan, crv.points-2, crv.points);
-        }
-        else if (crv.points < MAX_POINTS) {
-          if (moveCurve(s_curveChan, 1)) {
-            for (int8_t i=crv.points+crv.points-2; i>=0; i--) {
-              if (i%2)
-                crv.crv[i] = (crv.crv[i/2] + crv.crv[1+i/2]) / 2;
-              else
-                crv.crv[i] = crv.crv[i/2];
-            }
-          }
-        }
-        else {
-          AUDIO_WARNING2();
-        }
-      }
-      break;
-  }
-
-  lcd_putsLeft(7*FH, STR_TYPE);
-  uint8_t attr = (s_editMode <= 0 ? INVERS : 0);
-  lcdDrawNumber(5*FW-2, 7*FH, crv.points, LEFT|attr);
-  lcdDrawText(lcdLastPos, 7*FH, crv.custom ? PSTR("pt'") : PSTR("pt"), attr);
-
-  DrawCurve();
-
-  if (s_editMode>0) {
-    uint8_t i = menuHorizontalPosition;
-    point_t point = getPoint(i);
-
-    if (s_editMode==1 || !BLINK_ON_PHASE) {
-      // do selection square
-      lcdDrawFilledRect(point.x-1, point.y-2, 5, 5, SOLID, FORCE);
-      lcdDrawFilledRect(point.x, point.y-1, 3, 3, SOLID);
-    }
-
-    int8_t x = -100 + 200*i/(crv.points-1);
-    if (crv.custom && i>0 && i<crv.points-1) x = crv.crv[crv.points+i-1];
-    lcdDrawText(7, 2*FH, PSTR("x=")); lcdDrawNumber(7+2*FW, 2*FH, x, LEFT);
-    lcdDrawText(7, 3*FH, PSTR("y=")); lcdDrawNumber(7+2*FW, 3*FH, crv.crv[i], LEFT);
-    lcdDrawRect(3, 1*FH+4, 7*FW-2, 3*FH-2);
-
-    if (p1valdiff || event==EVT_KEY_FIRST(KEY_DOWN) || event==EVT_KEY_FIRST(KEY_UP) || event==EVT_KEY_REPT(KEY_DOWN) || event==EVT_KEY_REPT(KEY_UP))
-      CHECK_INCDEC_MODELVAR(event, crv.crv[i], -100, 100);  // edit Y on up/down
-
-    if (i>0 && i<crv.points-1 && s_editMode==2 && (event==EVT_KEY_FIRST(KEY_LEFT) || event==EVT_KEY_FIRST(KEY_RIGHT) || event==EVT_KEY_REPT(KEY_LEFT) || event==EVT_KEY_REPT(KEY_RIGHT)))
-      CHECK_INCDEC_MODELVAR(event, crv.crv[crv.points+i-1], i==1 ? -99 : crv.crv[crv.points+i-2]+1, i==crv.points-2 ? 99 : crv.crv[crv.points+i]-1);  // edit X on left/right
+void resetCustomCurveX(int8_t * points, int noPoints)
+{
+  for (int i=0; i<noPoints-2; i++) {
+    points[noPoints+i] = getCurveX(noPoints, i+1);
   }
 }
 
-#if defined(GVARS)
-  #define CURVE_SELECTED() (sub >= 0 && sub < MAX_CURVES)
-  #define GVAR_SELECTED()  (sub >= MAX_CURVES)
-#else
-  #define CURVE_SELECTED() (sub >= 0)
-#endif
+void displayPresetChoice(uint8_t event)
+{
+  displayWarning(event);
+  lcdDrawNumber(WARNING_LINE_X+FW*7, WARNING_LINE_Y, 45*warningInputValue/4, LEFT|INVERS);
+  lcdDrawChar(lcdLastPos, WARNING_LINE_Y, '@', INVERS);
+
+  if (warningResult) {
+    warningResult = 0;
+    CurveInfo & crv = g_model.curves[s_curveChan];
+    int8_t * points = curveAddress(s_curveChan);
+    int k = 25 * warningInputValue;
+    int dx = 2000 / (5+crv.points-1);
+    for (uint8_t i=0; i<5+crv.points; i++) {
+      int x = -1000 + i * dx;
+      points[i] = div_and_round(div_and_round(k * x, 100), 10);
+    }
+    if (crv.type == CURVE_TYPE_CUSTOM) {
+      resetCustomCurveX(points, 5+crv.points);
+    }
+  }
+}
+
+void onCurveOneMenu(const char * result)
+{
+  if (result == STR_CURVE_PRESET) {
+    POPUP_INPUT(STR_PRESET, displayPresetChoice, 0, -4, 4);
+  }
+  else if (result == STR_MIRROR) {
+    CurveInfo & crv = g_model.curves[s_curveChan];
+    int8_t * points = curveAddress(s_curveChan);
+    for (int i=0; i<5+crv.points; i++)
+      points[i] = -points[i];
+  }
+  else if (result == STR_CLEAR) {
+    CurveInfo & crv = g_model.curves[s_curveChan];
+    int8_t * points = curveAddress(s_curveChan);
+    for (int i=0; i<5+crv.points; i++)
+      points[i] = 0;
+    if (crv.type == CURVE_TYPE_CUSTOM) {
+      resetCustomCurveX(points, 5+crv.points);
+    }
+  }
+}
+
+
+void menuModelCurveOne(uint8_t event)
+{
+  static uint8_t pointsOfs = 0;
+  CurveData & crv = g_model.curves[s_curveChan];
+  int8_t * points = curveAddress(s_curveChan);
+
+  lcdDrawText(11*FW+FW/2, 0, TR_PT "\002X\006Y");
+  drawStringWithIndex(PSIZE(TR_MENUCURVES)*FW+FW, 0, "CV", s_curveChan+1);
+  lcdDrawFilledRect(0, 0, LCD_W, FH, SOLID);
+
+  SIMPLE_SUBMENU(STR_MENUCURVES, 4 + 5+crv.points + (crv.type==CURVE_TYPE_CUSTOM ? 5+crv.points-2 : 0));
+
+  lcd_putsLeft(FH+1, STR_NAME);
+  editName(INDENT_WIDTH, 2*FH+1, crv.name, sizeof(crv.name), event, menuVerticalPosition==0);
+
+  uint8_t attr = (menuVerticalPosition==1 ? (s_editMode>0 ? INVERS|BLINK : INVERS) : 0);
+  lcd_putsLeft(3*FH+1, STR_TYPE);
+  lcdDrawTextAtIndex(INDENT_WIDTH, 4*FH+1, STR_CURVE_TYPES, crv.type, attr);
+  if (attr) {
+    uint8_t newType = checkIncDecModelZero(event, crv.type, CURVE_TYPE_LAST);
+    if (newType != crv.type) {
+      for (int i=1; i<4+crv.points; i++) {
+        points[i] = calcRESXto100(applyCustomCurve(calc100toRESX(getCurveX(5+crv.points, i)), s_curveChan));
+      }
+      moveCurve(s_curveChan, checkIncDec_Ret > 0 ? 3+crv.points : -3-crv.points);
+      if (newType == CURVE_TYPE_CUSTOM) {
+        resetCustomCurveX(points, 5+crv.points);
+      }
+      crv.type = newType;
+    }
+  }
+
+  attr = (menuVerticalPosition==2 ? (s_editMode>0 ? INVERS|BLINK : INVERS) : 0);
+  lcd_putsLeft(5*FH+1, STR_COUNT);
+  lcdDrawNumber(INDENT_WIDTH, 6*FH+1, 5+crv.points, LEFT|attr);
+  lcdDrawText(lcdLastPos, 6*FH+1, STR_PTS, attr);
+  if (attr) {
+    int8_t count = checkIncDecModel(event, crv.points, -3, 12); // 2pts - 17pts
+    if (checkIncDec_Ret) {
+      int8_t newPoints[MAX_POINTS];
+      newPoints[0] = points[0];
+      newPoints[4+count] = points[4+crv.points];
+      for (int i=1; i<4+count; i++)
+        newPoints[i] = calcRESXto100(applyCustomCurve(calc100toRESX(getCurveX(5+count, i)), s_curveChan));
+      moveCurve(s_curveChan, checkIncDec_Ret*(crv.type==CURVE_TYPE_CUSTOM?2:1));
+      for (int i=0; i<5+count; i++) {
+        points[i] = newPoints[i];
+        if (crv.type == CURVE_TYPE_CUSTOM && i!=0 && i!=4+count)
+          points[5+count+i-1] = getCurveX(5+count, i);
+      }
+      crv.points = count;
+    }
+  }
+
+  lcd_putsLeft(7*FH+1, STR_SMOOTH);
+  drawCheckBox(7 * FW, 7 * FH + 1, crv.smooth, menuVerticalPosition == 3 ? INVERS : 0);
+  if (menuVerticalPosition==3) crv.smooth = checkIncDecModel(event, crv.smooth, 0, 1);
+
+  switch(event) {
+    case EVT_ENTRY:
+      pointsOfs = 0;
+      SET_SCROLLBAR_X(0);
+      break;
+    case EVT_KEY_LONG(KEY_ENTER):
+      if (menuVerticalPosition > 1) {
+        killEvents(event);
+        POPUP_MENU_ADD_ITEM(STR_CURVE_PRESET);
+        POPUP_MENU_ADD_ITEM(STR_MIRROR);
+        POPUP_MENU_ADD_ITEM(STR_CLEAR);
+        POPUP_MENU_START(onCurveOneMenu);
+      }
+      break;
+  }
+
+  DrawCurve(FW);
+
+  uint8_t posY = FH+1;
+  attr = (s_editMode > 0 ? INVERS|BLINK : INVERS);
+  for (uint8_t i=0; i<5+crv.points; i++) {
+    point_t point = getPoint(i);
+    uint8_t selectionMode = 0;
+    if (crv.type==CURVE_TYPE_CUSTOM) {
+      if (menuVerticalPosition==4+2*i || (i==5+crv.points-1 && menuVerticalPosition==4+5+crv.points+5+crv.points-2-1))
+        selectionMode = 2;
+      else if (i>0 && menuVerticalPosition==3+2*i)
+        selectionMode = 1;
+    }
+    else if (menuVerticalPosition == 4+i) {
+      selectionMode = 2;
+    }
+
+    if (i>=pointsOfs && i<pointsOfs+7) {
+      int8_t x = getCurveX(5+crv.points, i);
+      if (crv.type==CURVE_TYPE_CUSTOM && i>0 && i<5+crv.points-1) x = points[5+crv.points+i-1];
+      lcdDrawNumber(6+10*FW+FW/2, posY, i+1, LEFT);
+      lcdDrawNumber(3+14*FW, posY, x, LEFT|(selectionMode==1?attr:0));
+      lcdDrawNumber(3+18*FW, posY, points[i], LEFT|(selectionMode==2?attr:0));
+      posY += FH;
+    }
+
+    if (selectionMode > 0) {
+      // do selection square
+      lcdDrawFilledRect(point.x-FW-1, point.y-2, 5, 5, SOLID, FORCE);
+      lcdDrawFilledRect(point.x-FW, point.y-1, 3, 3, SOLID);
+      if (s_editMode > 0) {
+        if (selectionMode == 1)
+          CHECK_INCDEC_MODELVAR(event, points[5+crv.points+i-1], i==1 ? -100 : points[5+crv.points+i-2], i==5+crv.points-2 ? 100 : points[5+crv.points+i]);  // edit X
+        else if (selectionMode == 2)
+          CHECK_INCDEC_MODELVAR(event, points[i], -100, 100);
+      }
+      if (i < pointsOfs)
+        pointsOfs = i;
+      else if (i > pointsOfs+6)
+        pointsOfs = i-6;
+    }
+  }
+}
+
+void editCurveRef(coord_t x, coord_t y, CurveRef & curve, uint8_t event, uint8_t attr)
+{
+  lcdDrawTextAtIndex(x, y, "\004DiffExpoFuncCstm", curve.type, menuHorizontalPosition==0 ? attr : 0);
+  if (attr && menuHorizontalPosition==0) {
+    CHECK_INCDEC_MODELVAR_ZERO(event, curve.type, CURVE_REF_CUSTOM);
+    if (checkIncDec_Ret) curve.value = 0;
+  }
+  switch (curve.type) {
+    case CURVE_REF_DIFF:
+    case CURVE_REF_EXPO:
+      curve.value = GVAR_MENU_ITEM(x+5*FW+2, y, curve.value, -100, 100, menuHorizontalPosition==1 ? LEFT|attr : LEFT, 0, event);
+      break;
+    case CURVE_REF_FUNC:
+      lcdDrawTextAtIndex(x+5*FW+2, y, STR_VCURVEFUNC, curve.value, menuHorizontalPosition==1 ? attr : 0);
+      if (attr && menuHorizontalPosition==1) CHECK_INCDEC_MODELVAR_ZERO(event, curve.value, CURVE_BASE-1);
+      break;
+    case CURVE_REF_CUSTOM:
+      drawCurveName(x+5*FW+2, y, curve.value, menuHorizontalPosition==1 ? attr : 0);
+      if (attr && menuHorizontalPosition==1) {
+        if (event==EVT_KEY_LONG(KEY_ENTER) && curve.value!=0) {
+          s_curveChan = (curve.value<0 ? -curve.value-1 : curve.value-1);
+          pushMenu(menuModelCurveOne);
+        }
+        else {
+          CHECK_INCDEC_MODELVAR(event, curve.value, -MAX_CURVES, MAX_CURVES);
+        }
+      }
+      break;
+  }
+}
 
 void menuModelCurvesAll(uint8_t event)
 {
-#if defined(GVARS) && defined(PCBSTD)
-  SIMPLE_MENU(STR_MENUCURVES, menuTabModel, e_CurvesAll, 1+MAX_CURVES+MAX_GVARS);
-#else
-  SIMPLE_MENU(STR_MENUCURVES, menuTabModel, e_CurvesAll, 1+MAX_CURVES);
-#endif
+  SIMPLE_MENU(STR_MENUCURVES, menuTabModel, e_CurvesAll, MAX_CURVES);
 
-  int8_t  sub = menuVerticalPosition - 1;
+  int  sub = menuVerticalPosition;
 
   switch (event) {
-#if defined(ROTARY_ENCODER_NAVIGATION)
-    case EVT_ROTARY_BREAK:
-#endif
-    case EVT_KEY_FIRST(KEY_RIGHT):
-    case EVT_KEY_FIRST(KEY_ENTER):
-      if (CURVE_SELECTED() && !READ_ONLY()) {
+    case EVT_KEY_BREAK(KEY_ENTER):
+      if (!READ_ONLY()) {
         s_curveChan = sub;
         pushMenu(menuModelCurveOne);
       }
       break;
   }
 
-  for (uint8_t i=0; i<LCD_LINES-1; i++) {
+  for (int i=0; i<LCD_LINES-1; i++) {
     coord_t y = MENU_HEADER_HEIGHT + 1 + i*FH;
-    uint8_t k = i + menuVerticalOffset;
-    uint8_t attr = (sub == k ? INVERS : 0);
-#if defined(GVARS) && defined(PCBSTD)
-    if (k >= MAX_CURVES) {
-      drawStringWithIndex(0, y, STR_GV, k-MAX_CURVES+1);
-      if (GVAR_SELECTED()) {
-        if (attr && s_editMode>0) attr |= BLINK;
-        lcdDrawNumber(10*FW, y, GVAR_VALUE(k-MAX_CURVES, -1), attr);
-        if (attr) g_model.gvars[k-MAX_CURVES] = checkIncDec(event, g_model.gvars[k-MAX_CURVES], -1000, 1000, EE_MODEL);
-      }
-    }
-    else
-#endif
+    int k = i + menuVerticalOffset;
+    LcdFlags attr = (sub == k ? INVERS : 0);
     {
       drawStringWithIndex(0, y, STR_CV, k+1, attr);
+      CurveData & crv = g_model.curves[k];
+      editName(4*FW, y, crv.name, sizeof(crv.name), 0, 0);
+      lcdDrawNumber(11*FW, y, 5+crv.points, LEFT);
+      lcdDrawText(lcdLastPos, y, STR_PTS, 0);
     }
   }
 
-  if (CURVE_SELECTED()) {
-    s_curveChan = sub;
-    DrawCurve(23);
-  }
+  s_curveChan = sub;
+  DrawCurve(23);
 }

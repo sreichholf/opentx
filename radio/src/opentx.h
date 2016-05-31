@@ -320,7 +320,7 @@
   #define SWSRC_ID1                    SWSRC_SA1
   #define SWSRC_ID2                    SWSRC_SA2
 #else
-  #define IS_3POS(sw)      ((sw) == 0)
+//  #define IS_3POS(sw)      ((sw) == 0)
   #define IS_MOMENTARY(sw) (sw == SWSRC_TRN)
   #define SW_DSM2_BIND     SW_TRN
 #endif
@@ -796,7 +796,7 @@ swsrc_t getMovedSwitch();
 trim_t getRawTrimValue(uint8_t phase, uint8_t idx);
 int getTrimValue(uint8_t phase, uint8_t idx);
 
-#if defined(PCBTARANIS) || defined(PCBFLAMENCO) || defined(PCBHORUS)
+#if defined(VIRTUALINPUTS)
   bool setTrimValue(uint8_t phase, uint8_t idx, int trim);
 #else
   void setTrimValue(uint8_t phase, uint8_t idx, int trim);
@@ -1113,7 +1113,7 @@ extern uint16_t           BandGap;
 int intpol(int x, uint8_t idx);
 int expo(int x, int k);
 
-#if defined(CURVES) && defined(XCURVES)
+#if defined(CURVES) && defined(VIRTUALINPUTS)
   int applyCurve(int x, CurveRef & curve);
 #elif defined(CURVES)
   int applyCurve(int x, int8_t idx);
